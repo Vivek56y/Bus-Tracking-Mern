@@ -1,0 +1,34 @@
+// App.js
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./pages/Navbar";
+import Home from "./pages/Home";
+// import Addbuses from "./components/BusList";
+import BusMapPreview from "./components/BusMapPreview";
+import Contact from "./components/Contact";
+import BusList from "./components/BusList";
+import Addbuses from "./pages/Addbuses";
+import AddBusForm from "./components/AddBusForm"
+
+function App() {
+  return (
+    <Router>
+      <Navbar />
+
+      <div className="p-4">
+        <Routes>
+          <Route path="/" element={<Home />} />
+        
+          <Route path="/Addbuses" element={<Addbuses />} />
+          <Route path="/BusMapPreview" element={<BusMapPreview />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/Addbuses" element={<Addbuses/>}/>
+         <Route path="/AddBusForm" element={<AddBusForm/>}/>
+          <Route path="/BusList" element={<BusList/>}/>
+        </Routes>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
