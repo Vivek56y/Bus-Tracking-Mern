@@ -3,7 +3,7 @@ import AddBusForm from "../components/AddBusForm";
 import BusList from "../components/BusList";
 import axios from "axios";
 
-function AddBuses() {
+function Addbuses() {
   const [buses, setBuses] = useState([]);
 
   // Fetch buses from backend
@@ -28,4 +28,4 @@ function AddBuses() {
   );
 }
 
-export default AddBuses;
+export default Addbuses;

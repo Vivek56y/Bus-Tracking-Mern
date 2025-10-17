@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-function AddBusForm({addBusToList }) {
+function AddBusForm({ addBusToList = () => {} }) {
   const [busNumber, setBusNumber] = useState("");
   const [driverName, setDriverName] = useState("");
   const [route, setRoute] = useState("");

@@ -59,7 +59,7 @@ function Contact() {
 
         {/* Footer */}
         <div className="text-center mt-8 text-gray-500 text-sm">
-          <p>© {new Date().getFullYear()} BusGo | Developed by <span className="text-blue-600 font-medium">Vivek Ahir</span></p>
+          <p>@{new Date().getFullYear()} BusGo | Developed by <span className="text-blue-600 font-medium">Vivek Ahir</span></p>
         </div>
       </div>
     </div>
