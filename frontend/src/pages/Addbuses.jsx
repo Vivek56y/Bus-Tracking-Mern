@@ -10,8 +10,8 @@ function Addbuses() {
   useEffect(() => {
     axios
       .get("http://localhost:5000/api/buses")
-      .then(res => setBuses(res.data))
-      .catch(err => console.error(err));
+      .then((res) => setBuses(res.data))
+      .catch((err) => console.error(err));
   }, []);
 
   // Add new bus to list
