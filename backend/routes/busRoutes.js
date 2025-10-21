@@ -1,5 +1,5 @@
 const express = require("express");
-const Bus = require("../models/Bus");
+const Bus = require("../models/Bus.js");
 const router = express.Router();
 
 // Add a new bus
