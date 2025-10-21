@@ -10,3 +10,12 @@ html, body, #root {
 body {
   overflow-x: hidden;
 }
+@keyframes slideAcross {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.animate-slideAcross {
+  animation: slideAcross 10s linear infinite;
+}
+
