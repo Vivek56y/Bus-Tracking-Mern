@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { setAuthToken, setAuthUser } from "../lib/auth";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true); // toggle between login/signup
+  const [isLogin, setIsLogin] = useState(true);
+  const [signupStep, setSignupStep] = useState("form");
   const [loginAs, setLoginAs] = useState("client");
   const [form, setForm] = useState({
     name: "",
@@ -14,7 +15,10 @@ function AuthPage() {
     password: "",
     confirmPassword: "",
     adminKey: "",
+    otp: "",
   });
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -27,11 +31,9 @@ function AuthPage() {
     setError("");
 
     if (isLogin) {
-      // LOGIN
-      if (!form.email || !form.password) {
-        setError("Please fill in all fields.");
-        return;
-      }
+      if (!form.email) return setError("Email is required.");
+      if (!form.password) return setError("Password is required.");
+
       try {
         const res = await axios.post(`${API_BASE_URL}/api/auth/login`, {
           email: form.email,
@@ -40,57 +42,89 @@ function AuthPage() {
 
         const role = res.data?.user?.role;
         if (loginAs === "admin" && role !== "admin") {
-          setError("Please login using a valid Admin account.");
-          return;
+          return setError("Please login using a valid Admin account.");
         }
         if (loginAs === "client" && role !== "client") {
-          setError("Please login using a valid Customer account.");
-          return;
+          return setError("Please login using a valid Customer account.");
         }
 
-        alert(res.data.message || "Login successful!");
         if (res.data?.token) setAuthToken(res.data.token);
         if (res.data?.user) setAuthUser(res.data.user);
-        // Redirect after login
-        if (role === "admin") {
-          navigate("/dashboard/admin");
-        } else {
-          navigate("/dashboard/customer");
-        }
+
+        if (role === "admin") navigate("/dashboard/admin");
+        else navigate("/dashboard/customer");
       } catch (err) {
         console.error(err);
         setError(err.response?.data?.message || "Login failed.");
       }
-    } else {
-      // SIGNUP
-      if (!form.name || !form.email || !form.password || !form.confirmPassword) {
-        setError("Please fill in all fields.");
-        return;
-      }
-      if (form.password !== form.confirmPassword) {
-        setError("Passwords do not match.");
-        return;
-      }
-      try {
-        const payload = {
-          name: form.name,
-          email: form.email,
-          password: form.password,
-        };
-        if (loginAs === "admin") {
-          payload.role = "admin";
-          payload.adminKey = form.adminKey;
-        }
+      return;
+    }
 
-        const res = await axios.post(`${API_BASE_URL}/api/auth/signup`, payload);
-        alert(res.data.message || "Account created!");
+    // SIGNUP
+    if (signupStep === "otp") {
+      if (!form.email) return setError("Email is required.");
+      if (!form.otp) return setError("OTP is required.");
+
+      try {
+        setVerifyingOtp(true);
+        const res = await axios.post(`${API_BASE_URL}/api/auth/verify-otp`, {
+          email: form.email,
+          otp: form.otp,
+        });
+        setVerifyingOtp(false);
+
         if (res.data?.token) setAuthToken(res.data.token);
         if (res.data?.user) setAuthUser(res.data.user);
-        setIsLogin(true); // switch to login after signup
+
+        const role = res.data?.user?.role;
+        if (role === "admin") navigate("/dashboard/admin");
+        else navigate("/dashboard/customer");
       } catch (err) {
         console.error(err);
-        setError(err.response?.data?.message || "Signup failed.");
+        setVerifyingOtp(false);
+        setError(err.response?.data?.message || "OTP verification failed.");
       }
+      return;
+    }
+
+    if (!form.name) return setError("Full name is required.");
+    if (!form.email) return setError("Email is required.");
+    if (!form.password) return setError("Password is required.");
+    if (!form.confirmPassword) return setError("Confirm password is required.");
+    if (form.password !== form.confirmPassword) return setError("Passwords do not match.");
+
+    try {
+      const payload = {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+      };
+      if (loginAs === "admin") {
+        payload.role = "admin";
+        payload.adminKey = form.adminKey;
+      }
+
+      await axios.post(`${API_BASE_URL}/api/auth/signup`, payload);
+      setSignupStep("otp");
+      alert("Account created. OTP sent to your email.");
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Signup failed.");
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setError("");
+    if (!form.email) return setError("Email is required.");
+    try {
+      setSendingOtp(true);
+      await axios.post(`${API_BASE_URL}/api/auth/send-otp`, { email: form.email, role: loginAs });
+      alert("OTP sent to your email.");
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Failed to send OTP.");
+    } finally {
+      setSendingOtp(false);
     }
   };
 
@@ -101,15 +135,13 @@ function AuthPage() {
           BusGo
         </h1>
         <p className="text-slate-600 text-lg mt-2">
-          {isLogin
-            ? "Log in to continue tracking buses in real time."
-            : "Create your account and start tracking buses!"}
+          {isLogin ? "Login with password" : "Signup with OTP verification"}
         </p>
       </div>
 
       <div className="bg-white p-8 sm:p-10 rounded-3xl shadow-sm border border-slate-100 w-full max-w-md">
         <h2 className="text-2xl font-extrabold text-center text-slate-900 mb-4">
-          {isLogin ? "Login" : "Sign Up"}
+          {isLogin ? "Login" : signupStep === "otp" ? "Verify OTP" : "Create Account"}
         </h2>
 
         <div className="mb-5 grid grid-cols-2 gap-2">
@@ -138,7 +170,7 @@ function AuthPage() {
         </div>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
-          {!isLogin && (
+          {!isLogin && signupStep === "form" && (
             <div>
               <label className="block text-gray-700 font-medium mb-2">Full Name</label>
               <input
@@ -152,7 +184,7 @@ function AuthPage() {
             </div>
           )}
 
-          {!isLogin && loginAs === "admin" && (
+          {!isLogin && signupStep === "form" && loginAs === "admin" && (
             <div>
               <label className="block text-gray-700 font-medium mb-2">Admin Key</label>
               <input
@@ -178,23 +210,23 @@ function AuthPage() {
             />
           </div>
 
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-rose-300"
-              placeholder="Enter your password"
-            />
-          </div>
-
-          {!isLogin && (
+          {(isLogin || (!isLogin && signupStep === "form")) && (
             <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Confirm Password
-              </label>
+              <label className="block text-gray-700 font-medium mb-2">Password</label>
+              <input
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-rose-300"
+                placeholder="Enter your password"
+              />
+            </div>
+          )}
+
+          {!isLogin && signupStep === "form" && (
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Confirm Password</label>
               <input
                 type="password"
                 name="confirmPassword"
@@ -206,20 +238,65 @@ function AuthPage() {
             </div>
           )}
 
+          {!isLogin && signupStep === "otp" && (
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">OTP</label>
+              <input
+                type="text"
+                name="otp"
+                value={form.otp}
+                onChange={handleChange}
+                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-rose-300"
+                placeholder="Enter 6-digit OTP"
+              />
+            </div>
+          )}
+
           {error && <p className="text-red-500 text-center text-sm">{error}</p>}
 
           <button
             type="submit"
-            className="w-full bg-rose-600 text-white py-2.5 rounded-xl font-semibold hover:bg-rose-700 transition duration-300 shadow-sm"
+            disabled={sendingOtp || verifyingOtp}
+            className="w-full bg-rose-600 text-white py-2.5 rounded-xl font-semibold hover:bg-rose-700 transition duration-300 shadow-sm disabled:opacity-60"
           >
-            {isLogin ? "Login" : "Create Account"}
+            {isLogin
+              ? "Login"
+              : signupStep === "otp"
+                ? verifyingOtp
+                  ? "Verifying..."
+                  : "Verify OTP"
+                : "Create Account"}
           </button>
         </form>
+
+        {!isLogin && signupStep === "otp" && (
+          <button
+            type="button"
+            onClick={handleResendOtp}
+            disabled={sendingOtp}
+            className="mt-4 w-full bg-white text-slate-900 border border-slate-200 px-4 py-2.5 rounded-xl font-semibold hover:bg-slate-50 transition-colors disabled:opacity-60"
+          >
+            {sendingOtp ? "Sending OTP..." : "Resend OTP"}
+          </button>
+        )}
 
         <p className="text-center text-slate-600 mt-6">
           {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
           <button
-            onClick={() => setIsLogin(!isLogin)}
+            type="button"
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setSignupStep("form");
+              setError("");
+              setForm({
+                name: "",
+                email: "",
+                password: "",
+                confirmPassword: "",
+                adminKey: "",
+                otp: "",
+              });
+            }}
             className="text-rose-700 font-semibold hover:underline"
           >
             {isLogin ? "Sign Up" : "Login"}

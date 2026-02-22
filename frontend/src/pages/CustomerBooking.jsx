@@ -8,6 +8,7 @@ function CustomerBooking() {
   const [busType, setBusType] = useState("all");
   const [maxPrice, setMaxPrice] = useState(700);
   const [departure, setDeparture] = useState("any");
+  const [sortBy, setSortBy] = useState("recommended");
 
   const popularRoutes = useMemo(
     () => [
@@ -38,12 +39,37 @@ function CustomerBooking() {
     if (departure !== "any") list = list.filter((r) => r.dep === departure);
 
     list = list.filter((r) => r.price <= maxPrice);
+
+    if (sortBy === "price_low") list = [...list].sort((a, b) => a.price - b.price);
+    if (sortBy === "price_high") list = [...list].sort((a, b) => b.price - a.price);
     return list;
-  }, [popularRoutes, from, to, busType, maxPrice, departure]);
+  }, [popularRoutes, from, to, busType, maxPrice, departure, sortBy]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-rose-50/30 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="mb-6 rounded-3xl overflow-hidden border border-rose-100 bg-gradient-to-r from-rose-600 to-fuchsia-600 text-white">
+          <div className="p-5 sm:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold tracking-wider text-white/90">BUSGO OFFERS</p>
+              <h2 className="mt-1 text-xl sm:text-2xl font-extrabold">Up to 20% OFF on selected routes</h2>
+              <p className="text-white/90 text-sm mt-1">
+                Use code <span className="font-extrabold">BUSGO20</span> • Limited time
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="bg-white/10 border border-white/15 rounded-2xl px-4 py-3">
+                <p className="text-xs text-white/80">Popular</p>
+                <p className="font-extrabold">Delhi → Jaipur</p>
+              </div>
+              <div className="bg-white/10 border border-white/15 rounded-2xl px-4 py-3">
+                <p className="text-xs text-white/80">Fastest</p>
+                <p className="font-extrabold">Mumbai → Pune</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* AbhiBus-like search bar */}
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="bg-gradient-to-r from-rose-600 to-fuchsia-600 text-white px-6 sm:px-8 py-6">
@@ -52,7 +78,7 @@ function CustomerBooking() {
               Search buses and book tickets
             </h1>
             <p className="mt-1 text-white/90 text-sm">
-              AbhiBus-style UI — filters + clean result cards.
+              Compare routes, choose your bus, and book in minutes.
             </p>
           </div>
 
@@ -216,9 +242,20 @@ function CustomerBooking() {
                     {filteredRoutes.length} options found
                   </p>
                 </div>
-                <span className="text-xs font-semibold tracking-wider text-rose-700 bg-rose-50 border border-rose-100 px-3 py-1 rounded-full">
-                  RESULTS
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold tracking-wider text-rose-700 bg-rose-50 border border-rose-100 px-3 py-1 rounded-full">
+                    RESULTS
+                  </span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="text-sm border border-slate-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-rose-300"
+                  >
+                    <option value="recommended">Recommended</option>
+                    <option value="price_low">Price: Low to High</option>
+                    <option value="price_high">Price: High to Low</option>
+                  </select>
+                </div>
               </div>
 
               <div className="mt-5 grid gap-4">
@@ -233,6 +270,15 @@ function CustomerBooking() {
                       className="rounded-3xl border border-slate-100 bg-white p-5 sm:p-6 shadow-sm hover:shadow-md transition"
                     >
                       <div className="flex items-start justify-between gap-4 flex-wrap">
+                        <div className="flex items-start gap-4">
+                          <div className="h-16 w-16 rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 flex-shrink-0">
+                            <img
+                              src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=400&q=80"
+                              alt="Bus"
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          </div>
                         <div>
                           <p className="text-lg font-extrabold text-slate-900">
                             {r.from} <span className="text-rose-600">→</span> {r.to}
@@ -240,6 +286,21 @@ function CustomerBooking() {
                           <p className="mt-1 text-sm text-slate-600">
                             {r.type} • {r.dep} • Duration: <span className="font-semibold text-slate-900">{r.time}</span>
                           </p>
+
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
+                            <span className="text-xs font-extrabold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                              4.5 ★
+                            </span>
+                            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-50 text-slate-700 border border-slate-200">
+                              WiFi
+                            </span>
+                            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-50 text-slate-700 border border-slate-200">
+                              Charging
+                            </span>
+                            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-50 text-slate-700 border border-slate-200">
+                              Water bottle
+                            </span>
+                          </div>
 
                           <div className="mt-4 flex flex-wrap gap-2">
                             <span className="text-xs font-semibold px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-100">
@@ -254,6 +315,8 @@ function CustomerBooking() {
                           </div>
                         </div>
 
+                        </div>
+
                         <div className="text-right">
                           <p className="text-2xl font-extrabold text-slate-900">₹{r.price}</p>
                           <p className="text-xs text-slate-500">Onwards</p>
@@ -264,16 +327,33 @@ function CustomerBooking() {
                           </div>
                         </div>
                       </div>
+
+                      <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 flex items-center justify-between gap-3 flex-wrap">
+                        <p className="text-sm text-slate-700">
+                          Coupon: <span className="font-extrabold text-slate-900">BUSGO20</span> • Save up to <span className="font-extrabold">₹150</span>
+                        </p>
+                        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700">
+                          Limited seats
+                        </span>
+                      </div>
                     </div>
                   ))
                 )}
               </div>
 
               <div className="mt-6 rounded-2xl border border-rose-100 bg-rose-50/60 p-4">
-                <p className="text-sm font-semibold text-slate-900">Seat booking (next step)</p>
+                <p className="text-sm font-semibold text-slate-900">Need help with your booking?</p>
                 <p className="mt-1 text-sm text-slate-600">
-                  This page is UI-first like AbhiBus. Next we can build a real seat layout and booking API.
+                  For cancellations, refunds, or trip updates, visit the Help page.
                 </p>
+                <div className="mt-3">
+                  <Link
+                    to="/contact"
+                    className="inline-flex bg-white text-slate-900 border border-slate-200 px-4 py-2.5 rounded-xl font-semibold hover:bg-slate-50 transition-colors"
+                  >
+                    Contact Support
+                  </Link>
+                </div>
               </div>
             </div>
           </section>

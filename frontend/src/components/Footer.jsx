@@ -31,9 +31,7 @@ function Footer() {
           <p className="text-sm">
             © {new Date().getFullYear()} <span className="font-semibold text-slate-900">BusGo</span>. All rights reserved.
           </p>
-          <p className="text-xs text-slate-500">
-            Built for interviews: responsive UI, real-time tracking, admin dashboard.
-          </p>
+          <p className="text-xs text-slate-500">Book tickets, track buses, and travel smarter.</p>
         </div>
       </div>
     </footer>

@@ -38,11 +38,7 @@ function App() {
           />
           <Route
             path="/book"
-            element={
-              <ProtectedRoute allow={["client"]}>
-                <CustomerBooking />
-              </ProtectedRoute>
-            }
+            element={<CustomerBooking />}
           />
 
           {/* Backward compatibility */}
@@ -56,11 +52,7 @@ function App() {
           />
           <Route
             path="/BusMapPreview"
-            element={
-              <ProtectedRoute allow={["client"]}>
-                <LiveTracking />
-              </ProtectedRoute>
-            }
+            element={<LiveTracking />}
           />
           <Route path="/contact" element={<Contact />} />
           <Route path="/AddBusForm" element={<AddBusForm />} />

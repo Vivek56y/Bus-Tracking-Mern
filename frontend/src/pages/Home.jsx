@@ -12,6 +12,57 @@ function Home() {
       <Hero />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <section id="offers" className="pt-10 sm:pt-12">
+          <div className="flex items-end justify-between gap-4 flex-wrap">
+            <div>
+              <h3 className="text-2xl sm:text-3xl font-extrabold">Top Offers</h3>
+              <p className="text-slate-600 mt-1">Limited-time deals on popular routes.</p>
+            </div>
+            <span className="text-xs font-semibold tracking-wider text-rose-700 bg-rose-50 border border-rose-100 px-3 py-1 rounded-full">
+              DEALS
+            </span>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[ 
+              {
+                title: "Save 20% on first trip",
+                code: "BUSGO20",
+                note: "New users • Selected routes",
+                img: "https://images.unsplash.com/photo-1519666213638-31b1f61f08ca?auto=format&fit=crop&w=1200&q=80",
+              },
+              {
+                title: "Weekend getaway fares",
+                code: "WEEKEND",
+                note: "Fri–Sun • Goa & hill stations",
+                img: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80",
+              },
+              {
+                title: "Track & save",
+                code: "TRACK10",
+                note: "Live tracking routes",
+                img: "https://images.unsplash.com/photo-1508609349937-5ec4ae374ebf?auto=format&fit=crop&w=1200&q=80",
+              },
+            ].map((o) => (
+              <div key={o.code} className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition">
+                <div className="h-36 w-full relative">
+                  <img src={o.img} alt={o.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                  <div className="absolute inset-0 bg-gradient-to-tr from-black/55 via-black/20 to-transparent" />
+                  <div className="relative p-4">
+                    <span className="text-xs font-semibold tracking-wider text-white bg-white/10 border border-white/15 px-3 py-1 rounded-full">
+                      CODE: {o.code}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-5">
+                  <p className="text-lg font-extrabold text-slate-900">{o.title}</p>
+                  <p className="mt-1 text-sm text-slate-600">{o.note}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section className="py-10 sm:py-12">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2 bg-gradient-to-r from-rose-600 via-rose-600 to-fuchsia-600 text-white rounded-3xl p-6 sm:p-8 shadow-sm">
@@ -20,12 +71,12 @@ function Home() {
                 Flat 20% off on first tracking-enabled booking
               </h3>
               <p className="text-white/90 mt-2 max-w-2xl">
-                Add buses, see them live on the map, and showcase your full-stack skills with real-time updates.
+                Book tickets faster, track your bus live, and get timely updates for a stress-free journey.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
                 <span className="bg-white/10 border border-white/20 px-3 py-1 rounded-full text-sm">LIVE MAP</span>
                 <span className="bg-white/10 border border-white/20 px-3 py-1 rounded-full text-sm">REAL-TIME</span>
-                <span className="bg-white/10 border border-white/20 px-3 py-1 rounded-full text-sm">MERN</span>
+                <span className="bg-white/10 border border-white/20 px-3 py-1 rounded-full text-sm">OFFERS</span>
               </div>
             </div>
 
@@ -63,8 +114,58 @@ function Home() {
         <section className="py-10 sm:py-14">
           <div className="flex items-end justify-between gap-4 flex-wrap">
             <div>
+              <h3 className="text-2xl sm:text-3xl font-extrabold">Explore Destinations</h3>
+              <p className="text-slate-600 mt-1">Plan your next trip with trending places.</p>
+            </div>
+            <span className="text-xs font-semibold tracking-wider text-rose-700 bg-rose-50 border border-rose-100 px-3 py-1 rounded-full">TRAVEL</span>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              {
+                name: "Goa",
+                text: "Beach weekends",
+                img: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80",
+              },
+              {
+                name: "Manali",
+                text: "Hill station trips",
+                img: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1200&q=80",
+              },
+              {
+                name: "Jaipur",
+                text: "City of forts",
+                img: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80",
+              },
+              {
+                name: "Udaipur",
+                text: "Lakes & palaces",
+                img: "https://images.unsplash.com/photo-1599661046827-dacde07b2b66?auto=format&fit=crop&w=1200&q=80",
+              },
+            ].map((d) => (
+              <div key={d.name} className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition">
+                <div className="h-36 relative">
+                  <img src={d.img} alt={d.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                  <div className="absolute inset-0 bg-gradient-to-tr from-black/55 via-black/15 to-transparent" />
+                  <div className="relative p-4">
+                    <p className="text-white font-extrabold text-lg">{d.name}</p>
+                    <p className="text-white/90 text-sm">{d.text}</p>
+                  </div>
+                </div>
+                <div className="p-5">
+                  <p className="text-sm text-slate-600">Best fares and easy booking</p>
+                  <p className="mt-1 text-sm font-semibold text-rose-700">Explore routes →</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="py-10 sm:py-14">
+          <div className="flex items-end justify-between gap-4 flex-wrap">
+            <div>
               <h3 className="text-2xl sm:text-3xl font-extrabold">Popular Routes</h3>
-              <p className="text-slate-600 mt-1">Quick examples like RedBus — you can connect these to real data later.</p>
+              <p className="text-slate-600 mt-1">Fast booking for high-demand routes.</p>
             </div>
             <span className="text-xs font-semibold tracking-wider text-rose-700 bg-rose-50 border border-rose-100 px-3 py-1 rounded-full">TOP PICKS</span>
           </div>
@@ -107,9 +208,9 @@ function Home() {
           <div className="bg-white border border-slate-100 rounded-3xl p-6 sm:p-10 shadow-sm">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
               <div>
-                <h3 className="text-2xl sm:text-3xl font-extrabold">Trusted like a real product</h3>
+                <h3 className="text-2xl sm:text-3xl font-extrabold">Trusted by travelers</h3>
                 <p className="text-slate-600 mt-2 max-w-2xl">
-                  Clean UI, responsive layout, and real-time tracking — perfect to show in interviews.
+                  Simple booking, real-time tracking, and reliable support — designed for everyday travel.
                 </p>
               </div>
 
@@ -135,9 +236,9 @@ function Home() {
 
             <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { name: "Student", text: "Looks like a real RedBus-style project. The layout is clean and responsive." },
-                { name: "Recruiter", text: "Nice: MERN + Socket.io + Leaflet. Great interview project." },
-                { name: "Admin", text: "Dashboard + live tracking preview makes it feel like a real system." },
+                { name: "Traveler", text: "Booking was quick and the live tracking helped me plan perfectly." },
+                { name: "Daily Commuter", text: "ETA updates are accurate. I reach the stop at the right time." },
+                { name: "Family Trip", text: "Clean UI, great deals, and easy cancellations — smooth experience." },
               ].map((t) => (
                 <div key={t.name} className="rounded-3xl border border-slate-100 p-6 bg-gradient-to-b from-white to-rose-50/30">
                   <div className="flex items-center gap-1 text-rose-600">

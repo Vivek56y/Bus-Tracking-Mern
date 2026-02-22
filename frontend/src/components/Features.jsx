@@ -4,8 +4,8 @@ function Features() {
   const features = [
     { title: "Real-Time Tracking", desc: "Track buses live with accurate GPS data." },
     { title: "Easy Ticket Booking", desc: "Book your seats in just a few clicks." },
-    { title: "Instant Cancellation", desc: "Cancel and get instant confirmation." },
-    { title: "Secure Payments", desc: "Your transactions are 100% safe and fast." },
+    { title: "Instant Cancellation", desc: "Cancel quickly on select routes with instant confirmation." },
+    { title: "Trusted Operators", desc: "Choose from reliable operators with ratings and reviews." },
   ];
 
   return (
@@ -18,7 +18,7 @@ function Features() {
           Everything you need in one place
         </h3>
         <p className="text-slate-600 max-w-2xl">
-          A clean, fast and mobile-first bus system UI inspired by RedBus — built on the MERN stack.
+          A fast, mobile-first experience inspired by top travel apps — built for everyday journeys.
         </p>
       </div>
 

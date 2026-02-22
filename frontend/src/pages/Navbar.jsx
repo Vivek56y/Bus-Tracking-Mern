@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { clearAuthToken, getUserRole, isLoggedIn } from "../lib/auth";
 
@@ -13,6 +13,20 @@ function Navbar() {
   const [role, setRole] = useState(getUserRole());
   const [loggedIn, setLoggedIn] = useState(isLoggedIn());
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isActive = (to) => {
+    const a = (location.pathname || "").toLowerCase();
+    const b = (to || "").toLowerCase();
+    return a === b;
+  };
+
+  const linkClass = (to) => {
+    const active = isActive(to);
+    return `px-3 py-2 rounded-xl transition-colors ${
+      active ? "bg-white/15 text-white" : "text-white/90 hover:text-white hover:bg-white/10"
+    }`;
+  };
 
   useEffect(() => {
     const sync = () => {
@@ -50,12 +64,12 @@ function Navbar() {
   }, []);
 
   return (
-   <nav className="w-full bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-slate-100 py-4 px-4 sm:px-6 flex justify-between items-center sticky top-0 z-50">
+   <nav className="w-full bg-rose-600 border-b border-rose-700 py-3.5 px-4 sm:px-6 flex justify-between items-center sticky top-0 z-50">
 
       {/* Left Section */}
       <div className="flex items-center gap-4">
         <h1
-          className="text-2xl font-extrabold text-rose-600 cursor-pointer tracking-tight"
+          className="text-2xl font-extrabold text-white cursor-pointer tracking-tight"
           onClick={() => navigate("/")}
         >
           BusGo
@@ -63,15 +77,15 @@ function Navbar() {
 
         {/* Live Stats (hidden on very small screens) */}
         <div className="hidden sm:flex gap-3 text-sm">
-          <div className="bg-rose-50 px-3 py-1 rounded-full flex items-center gap-2 border border-rose-100">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            <span className="text-slate-700">
-              <strong className="text-rose-600">{activeBuses}</strong> Active
+          <div className="bg-white/10 px-3 py-1 rounded-full flex items-center gap-2 border border-white/15">
+            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+            <span className="text-white/90">
+              <strong className="text-white">{activeBuses}</strong> Live
             </span>
           </div>
-          <div className="bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
-            <span className="text-slate-700">
-              <strong className="text-slate-900">{busCount}</strong> Total Buses
+          <div className="bg-white/10 px-3 py-1 rounded-full border border-white/15">
+            <span className="text-white/90">
+              <strong className="text-white">{busCount}</strong> Buses
             </span>
           </div>
         </div>
@@ -79,7 +93,7 @@ function Navbar() {
 
       {/* Hamburger Button (Mobile) */}
       <button
-        className="sm:hidden text-slate-700 focus:outline-none rounded-md px-3 py-2 hover:bg-slate-100"
+        className="sm:hidden text-white focus:outline-none rounded-md px-3 py-2 hover:bg-white/10"
         onClick={() => setShowMobileMenu(!showMobileMenu)}
       >
         ☰
@@ -89,28 +103,31 @@ function Navbar() {
       <ul
         className={`${
           showMobileMenu ? "flex" : "hidden"
-        } sm:flex flex-col sm:flex-row gap-4 sm:gap-6 text-slate-800 font-medium items-start sm:items-center absolute sm:static top-[64px] left-0 w-full sm:w-auto bg-white sm:bg-transparent shadow-lg sm:shadow-none px-6 sm:px-0 py-4 sm:py-0 border-t border-slate-100 sm:border-none`}
+        } sm:flex flex-col sm:flex-row gap-2 sm:gap-2 text-white font-semibold items-start sm:items-center absolute sm:static top-[56px] left-0 w-full sm:w-auto bg-rose-600 sm:bg-transparent shadow-lg sm:shadow-none px-6 sm:px-0 py-4 sm:py-0 border-t border-rose-700 sm:border-none`}
       >
         <li>
-          <Link to="/" className="hover:text-rose-600 transition-colors">
+          <Link to="/" className={linkClass("/")}> 
             Home
           </Link>
         </li>
         <li>
-          <Link to="/BusMapPreview" className="hover:text-rose-600 transition-colors">
+          <Link to="/BusMapPreview" className={linkClass("/BusMapPreview")}> 
             Live Tracking
           </Link>
         </li>
         {(!loggedIn || role !== "admin") && (
           <li>
-            <Link to="/book" className="hover:text-rose-600 transition-colors">
+            <Link to="/book" className={linkClass("/book")}> 
               Book Ticket
             </Link>
           </li>
         )}
         <li>
-          <Link to="/contact" className="hover:text-rose-600 transition-colors">
-            Contact
+          <a href="/#offers" className="px-3 py-2 rounded-xl transition-colors text-white/90 hover:text-white hover:bg-white/10">Offers</a>
+        </li>
+        <li>
+          <Link to="/contact" className={linkClass("/contact")}> 
+            Help
           </Link>
         </li>
 
@@ -119,12 +136,12 @@ function Navbar() {
           <li className="relative">
             <button
               onClick={() => setShowDashboardMenu(!showDashboardMenu)}
-              className="hover:text-rose-600 transition-colors flex items-center gap-1"
+              className="px-3 py-2 rounded-xl transition-colors flex items-center gap-1 text-white/90 hover:text-white hover:bg-white/10"
             >
               Dashboard <span className="text-xs">▼</span>
             </button>
             {showDashboardMenu && (
-              <div className="absolute top-full left-0 mt-2 bg-white shadow-lg rounded-lg py-2 w-52 border border-gray-200 z-50">
+              <div className="absolute top-full left-0 mt-2 bg-white shadow-lg rounded-lg py-2 w-52 border border-gray-200 z-50 text-slate-900">
                 {role === "admin" ? (
                   <Link
                     to="/dashboard/admin"
@@ -157,7 +174,7 @@ function Navbar() {
           {!loggedIn ? (
             <Link
               to="/Login"
-              className="bg-rose-600 text-white px-4 py-2 rounded-lg hover:bg-rose-700 transition-colors shadow-sm"
+              className="bg-white text-rose-700 px-4 py-2 rounded-xl hover:bg-rose-50 transition-colors shadow-sm font-extrabold"
             >
               Login
             </Link>
@@ -165,7 +182,7 @@ function Navbar() {
             <button
               type="button"
               onClick={handleLogout}
-              className="bg-white text-slate-900 border border-slate-200 px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors shadow-sm font-semibold"
+              className="bg-white/10 text-white border border-white/20 px-4 py-2 rounded-xl hover:bg-white/15 transition-colors shadow-sm font-extrabold"
             >
               Logout
             </button>
