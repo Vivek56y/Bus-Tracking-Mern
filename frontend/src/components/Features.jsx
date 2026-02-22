@@ -9,13 +9,27 @@ function Features() {
   ];
 
   return (
-    <section className="py-16 bg-gray-50 text-center">
-      <h3 className="text-3xl font-bold text-gray-800 mb-10">Our Features</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 px-6 md:px-20">
+    <section className="py-10 sm:py-14 text-center">
+      <div className="flex flex-col items-center">
+        <span className="text-xs font-semibold tracking-wider text-rose-700 bg-rose-50 border border-rose-100 px-3 py-1 rounded-full">
+          WHY BUSGO
+        </span>
+        <h3 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-4 mb-3">
+          Everything you need in one place
+        </h3>
+        <p className="text-slate-600 max-w-2xl">
+          A clean, fast and mobile-first bus system UI inspired by RedBus — built on the MERN stack.
+        </p>
+      </div>
+
+      <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {features.map((f, i) => (
-          <div key={i} className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all">
-            <h4 className="text-xl font-semibold text-blue-600 mb-2">{f.title}</h4>
-            <p className="text-gray-600">{f.desc}</p>
+          <div key={i} className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all border border-slate-100 text-left">
+            <div className="h-10 w-10 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center mb-4 text-rose-600 font-bold">
+              {i + 1}
+            </div>
+            <h4 className="text-lg font-bold text-gray-900 mb-2">{f.title}</h4>
+            <p className="text-slate-600">{f.desc}</p>
           </div>
         ))}
       </div>
