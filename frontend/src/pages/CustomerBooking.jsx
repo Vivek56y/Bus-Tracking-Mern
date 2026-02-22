@@ -1,14 +1,33 @@
 import React, { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { getAuthHeader, isLoggedIn } from "../lib/auth";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 function CustomerBooking() {
+  const navigate = useNavigate();
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [date, setDate] = useState("");
+  const [appliedFrom, setAppliedFrom] = useState("");
+  const [appliedTo, setAppliedTo] = useState("");
+  const [appliedDate, setAppliedDate] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
   const [busType, setBusType] = useState("all");
   const [maxPrice, setMaxPrice] = useState(700);
   const [departure, setDeparture] = useState("any");
   const [sortBy, setSortBy] = useState("recommended");
+
+  const [seatModalOpen, setSeatModalOpen] = useState(false);
+  const [activeRoute, setActiveRoute] = useState(null);
+  const [bookedSeats, setBookedSeats] = useState([]);
+  const [selectedSeats, setSelectedSeats] = useState([]);
+  const [seatError, setSeatError] = useState("");
+  const [seatLoading, setSeatLoading] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingSuccess, setBookingSuccess] = useState("");
+  const [authPromptOpen, setAuthPromptOpen] = useState(false);
 
   const popularRoutes = useMemo(
     () => [
@@ -18,6 +37,16 @@ function CustomerBooking() {
       { id: "r4", from: "Hyderabad", to: "Vijayawada", time: "5h 20m", price: 610, type: "AC", dep: "Night" },
       { id: "r5", from: "Ahmedabad", to: "Surat", time: "4h 10m", price: 499, type: "Non-AC", dep: "Morning" },
       { id: "r6", from: "Chennai", to: "Pondicherry", time: "3h 30m", price: 420, type: "Non-AC", dep: "Afternoon" },
+      { id: "r7", from: "Kolkata", to: "Durgapur", time: "3h 20m", price: 380, type: "Non-AC", dep: "Morning" },
+      { id: "r8", from: "Lucknow", to: "Varanasi", time: "5h 10m", price: 540, type: "AC", dep: "Night" },
+      { id: "r9", from: "Jaipur", to: "Udaipur", time: "6h 00m", price: 650, type: "AC", dep: "Afternoon" },
+      { id: "r10", from: "Indore", to: "Bhopal", time: "3h 05m", price: 360, type: "Non-AC", dep: "Evening" },
+      { id: "r11", from: "Chandigarh", to: "Manali", time: "8h 30m", price: 720, type: "AC", dep: "Night" },
+      { id: "r12", from: "Kochi", to: "Thiruvananthapuram", time: "5h 35m", price: 560, type: "Non-AC", dep: "Morning" },
+      { id: "r13", from: "Bhubaneswar", to: "Puri", time: "2h 05m", price: 220, type: "Non-AC", dep: "Afternoon" },
+      { id: "r14", from: "Guwahati", to: "Shillong", time: "3h 10m", price: 340, type: "Non-AC", dep: "Morning" },
+      { id: "r15", from: "Nagpur", to: "Amravati", time: "3h 00m", price: 310, type: "Non-AC", dep: "Evening" },
+      { id: "r16", from: "Patna", to: "Gaya", time: "2h 35m", price: 260, type: "Non-AC", dep: "Afternoon" },
     ],
     []
   );
@@ -27,11 +56,155 @@ function CustomerBooking() {
     setTo(r.to);
   };
 
+  const seatGrid = useMemo(() => {
+    // 40 seats: A1-A10, B1-B10, C1-C10, D1-D10
+    const rows = ["A", "B", "C", "D"];
+    const cols = Array.from({ length: 10 }, (_, i) => i + 1);
+    return rows.flatMap((row) => cols.map((c) => `${row}${c}`));
+  }, []);
+
+  const normalizeSeat = (s) => String(s || "").trim().toUpperCase();
+
+  const closeSeatModal = () => {
+    setSeatModalOpen(false);
+    setActiveRoute(null);
+    setBookedSeats([]);
+    setSelectedSeats([]);
+    setSeatError("");
+    setSeatLoading(false);
+    setBookingLoading(false);
+    setBookingSuccess("");
+    setAuthPromptOpen(false);
+  };
+
+  const openSeatModal = async (route) => {
+    setSeatError("");
+    setBookingSuccess("");
+    setAuthPromptOpen(false);
+
+    if (!date) {
+      setSeatError("Please select a travel date first.");
+      return;
+    }
+
+    setActiveRoute(route);
+    setSelectedSeats([]);
+    setSeatModalOpen(true);
+    setSeatLoading(true);
+
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/bookings/seats`, {
+        params: { routeId: route.id, travelDate: date },
+      });
+      setBookedSeats((res.data?.bookedSeats || []).map(normalizeSeat));
+    } catch (err) {
+      setSeatError("Failed to load seat availability. Please try again.");
+      setBookedSeats([]);
+    } finally {
+      setSeatLoading(false);
+    }
+  };
+
+  const toggleSeat = (seat) => {
+    const s = normalizeSeat(seat);
+    if (!s) return;
+    if (bookedSeats.includes(s)) return;
+
+    setSelectedSeats((prev) => {
+      if (prev.includes(s)) return prev.filter((x) => x !== s);
+      if (prev.length >= 6) return prev; // simple cap
+      return [...prev, s];
+    });
+  };
+
+  const totalAmount = useMemo(() => {
+    const base = activeRoute?.price || 0;
+    return base * selectedSeats.length;
+  }, [activeRoute, selectedSeats.length]);
+
+  const onConfirmBooking = async () => {
+    setSeatError("");
+    setBookingSuccess("");
+    setAuthPromptOpen(false);
+
+    if (!activeRoute) {
+      setSeatError("Please select a bus first.");
+      return;
+    }
+    if (!date) {
+      setSeatError("Please select a travel date.");
+      return;
+    }
+    if (selectedSeats.length === 0) {
+      setSeatError("Please select at least one seat.");
+      return;
+    }
+    if (!isLoggedIn()) {
+      setAuthPromptOpen(true);
+      return;
+    }
+
+    setBookingLoading(true);
+    try {
+      const payload = {
+        routeId: activeRoute.id,
+        from: activeRoute.from,
+        to: activeRoute.to,
+        travelDate: date,
+        seats: selectedSeats,
+        amount: totalAmount,
+      };
+
+      const res = await axios.post(`${API_BASE_URL}/api/bookings`, payload, {
+        headers: getAuthHeader(),
+      });
+
+      const confirmed = res.data?.booking;
+      setBookingSuccess(
+        confirmed
+          ? `Booking confirmed. Seats: ${(confirmed.seats || []).join(", ")}`
+          : "Booking confirmed."
+      );
+
+      // lock selected seats in UI
+      setBookedSeats((prev) => Array.from(new Set([...prev, ...selectedSeats])));
+      setSelectedSeats([]);
+    } catch (err) {
+      const status = err?.response?.status;
+      if (status === 401) {
+        setAuthPromptOpen(true);
+      } else if (status === 409) {
+        const taken = err?.response?.data?.takenSeats;
+        setSeatError(
+          taken?.length
+            ? `Seats already booked: ${taken.join(", ")}. Please pick different seats.`
+            : "Some selected seats are already booked. Please try again."
+        );
+        if (taken?.length) {
+          setBookedSeats((prev) => Array.from(new Set([...prev, ...taken.map(normalizeSeat)])));
+          setSelectedSeats((prev) => prev.filter((s) => !taken.map(normalizeSeat).includes(s)));
+        }
+      } else {
+        setSeatError("Booking failed. Please try again.");
+      }
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
+  const onSearch = (e) => {
+    e.preventDefault();
+    setAppliedFrom(from);
+    setAppliedTo(to);
+    setAppliedDate(date);
+    setHasSearched(true);
+  };
+
   const filteredRoutes = useMemo(() => {
     let list = popularRoutes;
 
-    const f = from.trim().toLowerCase();
-    const t = to.trim().toLowerCase();
+    const f = (hasSearched ? appliedFrom : "").trim().toLowerCase();
+    const t = (hasSearched ? appliedTo : "").trim().toLowerCase();
     if (f) list = list.filter((r) => r.from.toLowerCase().includes(f));
     if (t) list = list.filter((r) => r.to.toLowerCase().includes(t));
 
@@ -43,7 +216,7 @@ function CustomerBooking() {
     if (sortBy === "price_low") list = [...list].sort((a, b) => a.price - b.price);
     if (sortBy === "price_high") list = [...list].sort((a, b) => b.price - a.price);
     return list;
-  }, [popularRoutes, from, to, busType, maxPrice, departure, sortBy]);
+  }, [popularRoutes, appliedFrom, appliedTo, hasSearched, busType, maxPrice, departure, sortBy]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-rose-50/30 to-white">
@@ -83,7 +256,7 @@ function CustomerBooking() {
           </div>
 
           <div className="px-4 sm:px-6 py-5">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <form onSubmit={onSearch} className="grid grid-cols-1 lg:grid-cols-12 gap-4">
               <div className="lg:col-span-4 flex items-center bg-white border border-slate-200 rounded-2xl shadow-sm focus-within:ring-2 focus-within:ring-rose-300 transition">
                 <span className="px-3 text-rose-600 text-2xl">🏙️</span>
                 <input
@@ -114,11 +287,14 @@ function CustomerBooking() {
                 />
               </div>
               <div className="lg:col-span-2">
-                <button className="w-full bg-rose-600 hover:bg-rose-700 text-white px-5 py-3 rounded-2xl font-semibold shadow-sm transition">
+                <button
+                  type="submit"
+                  className="w-full h-full bg-rose-600 hover:bg-rose-700 text-white px-5 py-3 rounded-2xl font-semibold shadow-sm transition"
+                >
                   Search
                 </button>
               </div>
-            </div>
+            </form>
 
             <div className="mt-4 flex flex-wrap gap-2">
               <Link
@@ -261,7 +437,21 @@ function CustomerBooking() {
               <div className="mt-5 grid gap-4">
                 {filteredRoutes.length === 0 ? (
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-slate-700">
-                    No buses match your filters.
+                    {hasSearched && (appliedFrom.trim() || appliedTo.trim()) ? (
+                      <div>
+                        <p className="font-bold text-slate-900">No buses found for this route.</p>
+                        <p className="mt-1 text-sm text-slate-700">
+                          {appliedFrom.trim() ? appliedFrom.trim() : "From"} <span className="text-rose-600">→</span>{" "}
+                          {appliedTo.trim() ? appliedTo.trim() : "To"}
+                          {appliedDate ? <span className="text-slate-500"> • {appliedDate}</span> : null}
+                        </p>
+                        <p className="mt-2 text-sm text-slate-600">
+                          Try a different spelling or choose one of the popular routes.
+                        </p>
+                      </div>
+                    ) : (
+                      "No buses match your filters."
+                    )}
                   </div>
                 ) : (
                   filteredRoutes.map((r) => (
@@ -321,7 +511,11 @@ function CustomerBooking() {
                           <p className="text-2xl font-extrabold text-slate-900">₹{r.price}</p>
                           <p className="text-xs text-slate-500">Onwards</p>
                           <div className="mt-3 flex justify-end">
-                            <button className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl font-semibold shadow-sm transition">
+                            <button
+                              type="button"
+                              onClick={() => openSeatModal(r)}
+                              className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl font-semibold shadow-sm transition"
+                            >
                               View Seats
                             </button>
                           </div>
@@ -359,6 +553,157 @@ function CustomerBooking() {
           </section>
         </div>
       </div>
+
+      {seatModalOpen ? (
+        <div className="fixed inset-0 z-50">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={closeSeatModal}
+            role="button"
+            tabIndex={-1}
+          />
+
+          <div className="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-3 sm:p-6">
+            <div className="w-full sm:max-w-3xl bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+              <div className="px-5 sm:px-6 py-4 bg-gradient-to-r from-rose-600 to-fuchsia-600 text-white flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold tracking-wider text-white/90">SEAT SELECTION</p>
+                  <p className="mt-1 font-extrabold text-lg">
+                    {activeRoute?.from} <span className="text-white/90">→</span> {activeRoute?.to}
+                  </p>
+                  <p className="text-sm text-white/90">Travel date: {date || "-"}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeSeatModal}
+                  className="bg-white/15 hover:bg-white/20 border border-white/20 text-white px-3 py-2 rounded-xl font-semibold"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="p-5 sm:p-6">
+                {seatError ? <p className="text-rose-600 text-sm font-semibold">{seatError}</p> : null}
+                {bookingSuccess ? (
+                  <p className="mt-2 text-emerald-700 text-sm font-semibold">{bookingSuccess}</p>
+                ) : null}
+
+                {authPromptOpen ? (
+                  <div className="mt-4 rounded-2xl border border-rose-100 bg-rose-50/60 p-4">
+                    <p className="text-sm font-extrabold text-slate-900">Login required to book</p>
+                    <p className="mt-1 text-sm text-slate-600">
+                      Please login (or create an account) to confirm your seats.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => navigate("/Login")}
+                        className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl font-semibold shadow-sm transition"
+                      >
+                        Login / Sign up
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAuthPromptOpen(false)}
+                        className="bg-white hover:bg-slate-50 text-slate-900 px-4 py-2.5 rounded-xl font-semibold shadow-sm transition border border-slate-200"
+                      >
+                        Continue browsing
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="mt-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-8">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-extrabold text-slate-900">Choose seats</p>
+                      <div className="text-xs text-slate-600 flex items-center gap-3">
+                        <span className="inline-flex items-center gap-1">
+                          <span className="h-3 w-3 rounded bg-slate-200 inline-block" /> Booked
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <span className="h-3 w-3 rounded bg-rose-600 inline-block" /> Selected
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      {seatLoading ? (
+                        <p className="text-sm text-slate-700">Loading seats…</p>
+                      ) : (
+                        <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
+                          {seatGrid.map((s) => {
+                            const ns = normalizeSeat(s);
+                            const isBooked = bookedSeats.includes(ns);
+                            const isSelected = selectedSeats.includes(ns);
+                            return (
+                              <button
+                                key={ns}
+                                type="button"
+                                onClick={() => toggleSeat(ns)}
+                                disabled={isBooked}
+                                className={`text-xs font-extrabold rounded-lg px-2 py-2 border transition ${
+                                  isBooked
+                                    ? "bg-slate-200 text-slate-500 border-slate-200 cursor-not-allowed"
+                                    : isSelected
+                                      ? "bg-rose-600 text-white border-rose-600"
+                                      : "bg-white text-slate-800 border-slate-200 hover:bg-slate-50"
+                                }`}
+                              >
+                                {ns}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                    <p className="mt-2 text-xs text-slate-600">
+                      You can select up to 6 seats per booking.
+                    </p>
+                  </div>
+
+                  <div className="lg:col-span-4">
+                    <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                      <p className="text-sm font-extrabold text-slate-900">Booking summary</p>
+                      <div className="mt-3 grid gap-2 text-sm">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-600">Fare per seat</span>
+                          <span className="font-extrabold text-slate-900">₹{activeRoute?.price || 0}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-600">Selected seats</span>
+                          <span className="font-extrabold text-slate-900">{selectedSeats.length}</span>
+                        </div>
+                        <div className="h-px bg-slate-200 my-2" />
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-600">Total</span>
+                          <span className="text-lg font-extrabold text-slate-900">₹{totalAmount}</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <button
+                          type="button"
+                          onClick={onConfirmBooking}
+                          disabled={bookingLoading || seatLoading}
+                          className="w-full bg-rose-600 hover:bg-rose-700 disabled:bg-rose-300 text-white px-4 py-3 rounded-2xl font-semibold shadow-sm transition"
+                        >
+                          {bookingLoading ? "Booking…" : "Book Ticket"}
+                        </button>
+                        {!isLoggedIn() ? (
+                          <p className="mt-2 text-xs text-slate-600">
+                            Login is required to confirm booking.
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

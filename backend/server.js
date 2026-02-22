@@ -1,4 +1,5 @@
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env"), override: true });
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -18,9 +19,11 @@ connectDb();
 // 🛣️ Routes
 const busRoutes = require("./routes/busRoutes");
 const loginRoutes = require("./routes/loginRoutes");
+const bookingRoutes = require("./routes/bookingRoutes");
 
 app.use("/api/buses", busRoutes);
 app.use("/api/auth", loginRoutes); // Changed from /api/login → /api/auth for clarity
+app.use("/api/bookings", bookingRoutes);
 
 // 🧭 Root Test Route
 app.get("/", (req, res) => {

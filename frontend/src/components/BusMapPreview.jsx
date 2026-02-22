@@ -5,13 +5,32 @@ import "leaflet/dist/leaflet.css";
 import axios from "axios";
 import { socket } from "../lib/socket";
 
-// Custom bus icon
-const busIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/61/61212.png",
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
-  popupAnchor: [0, -35],
-});
+function makeBusDivIcon(color = "#0f172a") {
+  const html = `
+    <div style="
+      width: 38px;
+      height: 38px;
+      border-radius: 9999px;
+      background: ${color};
+      border: 3px solid rgba(255,255,255,0.95);
+      box-shadow: 0 10px 22px rgba(2,6,23,0.18);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      line-height: 1;
+      color: white;
+    ">
+      🚌
+    </div>
+  `;
+  return L.divIcon({
+    className: "",
+    html,
+    iconSize: [38, 38],
+    iconAnchor: [19, 38],
+    popupAnchor: [0, -34],
+  });
+}
 
 // Component to auto pan map
 function AutoPan({ center }) {
@@ -21,6 +40,24 @@ function AutoPan({ center }) {
       map.setView(center, map.getZoom(), { animate: true });
     }
   }, [center, map]);
+  return null;
+}
+
+function FitBounds({ points }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!Array.isArray(points)) return;
+    const valid = points.filter(
+      (p) => Array.isArray(p) && p.length === 2 && Number.isFinite(p[0]) && Number.isFinite(p[1])
+    );
+
+    if (valid.length >= 2) {
+      const bounds = L.latLngBounds(valid.map((p) => L.latLng(p[0], p[1])));
+      map.fitBounds(bounds, { padding: [40, 40] });
+    }
+  }, [map, points]);
+
   return null;
 }
 
@@ -76,60 +113,46 @@ function BusMapPreview({ buses = [] }) {
       ? [parseFloat(mapBuses[0].latitude), parseFloat(mapBuses[0].longitude)]
       : [20.5937, 78.9629]; // default to India
 
+  const points = useMemo(() => {
+    return mapBuses
+      .map((b) => [parseFloat(b?.latitude), parseFloat(b?.longitude)])
+      .filter((p) => Number.isFinite(p[0]) && Number.isFinite(p[1]));
+  }, [mapBuses]);
+
   return (
-    <div className="bg-white shadow-sm rounded-2xl p-4 sm:p-6 max-w-6xl mx-auto border border-slate-100">
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-5">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900">
-            Live Bus Tracking
-          </h2>
-          <p className="text-slate-600 mt-1">
-            Real-time map preview. Invalid locations are skipped.
-          </p>
-        </div>
-        <div className="text-xs font-semibold tracking-wider text-rose-700 bg-rose-50 border border-rose-100 px-3 py-1 rounded-full w-fit">
-          REAL-TIME
-        </div>
-      </div>
+    <div className="h-[360px] sm:h-[520px] w-full rounded-2xl overflow-hidden shadow-sm border border-slate-200">
+      <MapContainer center={validCenter} zoom={5} style={{ height: "100%", width: "100%" }}>
+        <TileLayer
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        />
 
-      <div className="h-[360px] sm:h-[500px] w-full rounded-2xl overflow-hidden shadow-sm border border-slate-200">
-        <MapContainer
-          center={validCenter}
-          zoom={5}
-          style={{ height: "100%", width: "100%" }}
-        >
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <AutoPan center={validCenter} />
+        <AutoPan center={validCenter} />
+        <FitBounds points={points} />
 
-          {mapBuses.map((bus) => {
-            const lat = parseFloat(bus.latitude);
-            const lng = parseFloat(bus.longitude);
-            if (!isNaN(lat) && !isNaN(lng)) {
-              return (
-                <Marker key={bus._id} position={[lat, lng]} icon={busIcon}>
-                  <Popup>
-                    <p className="text-rose-700 font-bold">{bus.busNumber}</p>
-                    <p>Driver: {bus.driverName}</p>
-                    <p>Route: {bus.route}</p>
-                    {bus.status && (
-                      <p
-                        className={
-                          bus.status.toLowerCase() === "on time"
-                            ? "text-green-600 font-semibold"
-                            : "text-rose-600 font-semibold"
-                        }
-                      >
-                        Status: {bus.status}
-                      </p>
-                    )}
-                  </Popup>
-                </Marker>
-              );
-            }
-            return null;
-          })}
-        </MapContainer>
-      </div>
+        {mapBuses.map((bus) => {
+          const lat = parseFloat(bus.latitude);
+          const lng = parseFloat(bus.longitude);
+          if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
+
+          const status = (bus?.status || "").toLowerCase();
+
+          return (
+            <Marker key={bus._id} position={[lat, lng]} icon={makeBusDivIcon("#0b1220")}>
+              <Popup>
+                <p className="text-rose-700 font-bold">{bus.busNumber}</p>
+                <p>Driver: {bus.driverName}</p>
+                <p>Route: {bus.route}</p>
+                {bus.status && (
+                  <p className={status === "on time" ? "text-green-600 font-semibold" : "text-rose-600 font-semibold"}>
+                    Status: {bus.status}
+                  </p>
+                )}
+              </Popup>
+            </Marker>
+          );
+        })}
+      </MapContainer>
     </div>
   );
 }

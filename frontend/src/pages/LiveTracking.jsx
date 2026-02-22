@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import BusMapPreview from "../components/BusMapPreview";
+import { getUserRole, isLoggedIn } from "../lib/auth";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
@@ -23,6 +24,11 @@ function LiveTracking() {
   const [buses, setBuses] = useState([]);
   const [selectedRoute, setSelectedRoute] = useState("all");
   const [selectedBusId, setSelectedBusId] = useState("all");
+  const [showAllOnMap, setShowAllOnMap] = useState(false);
+
+  const role = getUserRole();
+  const loggedIn = isLoggedIn();
+  const isAdmin = role === "admin";
 
   useEffect(() => {
     axios
@@ -71,6 +77,17 @@ function LiveTracking() {
     const rest = filteredBuses.filter((b) => b?._id !== selectedBusId);
     return selected ? [selected, ...rest] : filteredBuses;
   }, [filteredBuses, selectedBusId]);
+
+  const selectedBus = useMemo(() => {
+    if (selectedBusId === "all") return null;
+    return (Array.isArray(buses) ? buses : []).find((b) => b?._id === selectedBusId) || null;
+  }, [buses, selectedBusId]);
+
+  const busesForMap = useMemo(() => {
+    if (isAdmin && showAllOnMap) return buses;
+    if (!isAdmin && selectedBusId === "all") return [];
+    return mapBuses;
+  }, [buses, isAdmin, mapBuses, selectedBusId, showAllOnMap]);
 
   const summary = useMemo(() => {
     const total = filteredBuses.length;
@@ -150,6 +167,20 @@ function LiveTracking() {
               </div>
 
               <div className="mt-5 grid gap-3">
+                {!isAdmin && (
+                  <div className="rounded-2xl border border-rose-100 bg-rose-50/60 p-4">
+                    <p className="text-sm font-extrabold text-slate-900">Which bus are you travelling on?</p>
+                    <p className="mt-1 text-sm text-slate-600">
+                      Select your route and bus number to see live location on the map.
+                    </p>
+                    {!loggedIn && (
+                      <p className="mt-2 text-xs text-slate-600">
+                        Tip: You can track without login, but booking requires login.
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 <div>
                   <label className="text-sm font-semibold text-slate-900">Route</label>
                   <select
@@ -157,6 +188,7 @@ function LiveTracking() {
                     onChange={(e) => {
                       setSelectedRoute(e.target.value);
                       setSelectedBusId("all");
+                      setShowAllOnMap(false);
                     }}
                     className="mt-2 w-full p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white"
                   >
@@ -173,7 +205,10 @@ function LiveTracking() {
                   <label className="text-sm font-semibold text-slate-900">Bus</label>
                   <select
                     value={selectedBusId}
-                    onChange={(e) => setSelectedBusId(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedBusId(e.target.value);
+                      setShowAllOnMap(false);
+                    }}
                     className="mt-2 w-full p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white"
                   >
                     <option value="all">All Buses</option>
@@ -184,6 +219,20 @@ function LiveTracking() {
                     ))}
                   </select>
                 </div>
+
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllOnMap((v) => !v)}
+                    className={`w-full mt-1 px-4 py-3 rounded-xl font-extrabold border transition-colors ${
+                      showAllOnMap
+                        ? "bg-slate-900 text-white border-slate-900"
+                        : "bg-white text-slate-900 border-slate-200 hover:bg-slate-50"
+                    }`}
+                  >
+                    {showAllOnMap ? "Showing All Buses" : "Show All Buses (Admin)"}
+                  </button>
+                )}
               </div>
 
               <div className="mt-6">
@@ -271,7 +320,51 @@ function LiveTracking() {
                 </span>
               </div>
 
-              <BusMapPreview buses={mapBuses} />
+              {!isAdmin && selectedBusId === "all" ? (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
+                  <p className="text-slate-900 font-extrabold">Select a bus to start tracking</p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Choose a route and bus number from the left panel.
+                  </p>
+                </div>
+              ) : (
+                <div className="mb-4 rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div>
+                      <p className="text-sm font-extrabold text-slate-900">
+                        {isAdmin && showAllOnMap
+                          ? "All buses (Admin view)"
+                          : selectedBus
+                            ? `${selectedBus.busNumber} • ${selectedBus.route}`
+                            : "Tracking selection"}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-600">
+                        {selectedBus
+                          ? `Last update: ${formatTime(selectedBus?.lastUpdatedAt || selectedBus?.updatedAt)}`
+                          : "Live location updates will appear here."}
+                      </p>
+                    </div>
+                    {selectedBus && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-extrabold px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-700">
+                          ETA ~{estimateEtaMinutes(selectedBus)} min
+                        </span>
+                        <span
+                          className={`text-xs font-extrabold px-2.5 py-1 rounded-full border ${
+                            (selectedBus?.status || "").toLowerCase() === "on time"
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                              : "bg-rose-50 text-rose-700 border-rose-100"
+                          }`}
+                        >
+                          {(selectedBus?.status || "LIVE").toString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <BusMapPreview buses={busesForMap} />
             </div>
           </div>
         </div>

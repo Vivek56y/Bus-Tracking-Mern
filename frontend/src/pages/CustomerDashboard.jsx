@@ -45,6 +45,19 @@ function CustomerDashboard() {
           </Link>
 
           <Link
+            to="/dashboard/customer/bookings"
+            className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition"
+          >
+            <p className="text-xs font-semibold tracking-wider text-rose-700 bg-rose-50 border border-rose-100 px-3 py-1 rounded-full w-fit">
+              TICKETS
+            </p>
+            <h2 className="mt-4 text-xl font-extrabold text-slate-900">My Bookings</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              View your confirmed tickets and seat details.
+            </p>
+          </Link>
+
+          <Link
             to="/BusMapPreview"
             className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition"
           >

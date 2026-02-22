@@ -10,6 +10,7 @@ import LoginPage from "./components/LoginPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import CustomerDashboard from "./pages/CustomerDashboard";
 import CustomerBooking from "./pages/CustomerBooking";
+import MyBookings from "./pages/MyBookings";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LiveTracking from "./pages/LiveTracking";
 // import SignupPage from "./components/SignupPage";
@@ -33,6 +34,14 @@ function App() {
             element={
               <ProtectedRoute allow={["client"]}>
                 <CustomerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/customer/bookings"
+            element={
+              <ProtectedRoute allow={["client"]}>
+                <MyBookings />
               </ProtectedRoute>
             }
           />

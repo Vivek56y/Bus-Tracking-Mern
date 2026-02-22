@@ -34,38 +34,38 @@ function Hero() {
 
             {/* Search Form */}
             <div className="mt-7 bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-100">
-              <div className="flex flex-col md:flex-row gap-4 sm:gap-5 p-4 sm:p-5 bg-gradient-to-r from-rose-50 to-fuchsia-50 rounded-2xl border border-white/60">
-                <div className="flex flex-col md:flex-row gap-4 w-full">
-                  <div className="flex items-center flex-1 bg-white border border-slate-200 rounded-xl shadow-sm focus-within:ring-2 focus-within:ring-rose-300 transition">
+              <div className="p-4 sm:p-5 bg-gradient-to-r from-rose-50 to-fuchsia-50 rounded-2xl border border-white/60">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                  <div className="md:col-span-4 h-14 flex items-center bg-white border border-slate-200 rounded-2xl shadow-sm focus-within:ring-2 focus-within:ring-rose-300 transition">
                     <span className="px-3 text-rose-600 text-2xl">🏙️</span>
                     <input
                       type="text"
-                      placeholder="From City"
-                      className="w-full p-3 border-none outline-none bg-transparent text-slate-900 placeholder:text-slate-400"
+                      placeholder="From (e.g., Mumbai)"
+                      className="w-full h-full px-1 border-none outline-none bg-transparent text-slate-900 placeholder:text-slate-400"
                     />
                   </div>
 
-                  <div className="flex items-center flex-1 bg-white border border-slate-200 rounded-xl shadow-sm focus-within:ring-2 focus-within:ring-rose-300 transition">
+                  <div className="md:col-span-4 h-14 flex items-center bg-white border border-slate-200 rounded-2xl shadow-sm focus-within:ring-2 focus-within:ring-rose-300 transition">
                     <span className="px-3 text-rose-600 text-2xl">🏙️</span>
                     <input
                       type="text"
-                      placeholder="To City"
-                      className="w-full p-3 border-none outline-none bg-transparent text-slate-900 placeholder:text-slate-400"
+                      placeholder="To (e.g., Pune)"
+                      className="w-full h-full px-1 border-none outline-none bg-transparent text-slate-900 placeholder:text-slate-400"
                     />
                   </div>
 
-                  <div className="flex items-center flex-1 bg-white border border-slate-200 rounded-xl shadow-sm focus-within:ring-2 focus-within:ring-rose-300 transition">
-                    <span className="px-3 text-rose-600 text-2xl">📅</span>
+                  <div className="md:col-span-2 h-14 flex items-center bg-white border border-slate-200 rounded-2xl shadow-sm focus-within:ring-2 focus-within:ring-rose-300 transition">
+                    <span className="px-3 text-rose-600 text-xl">📅</span>
                     <input
                       type="date"
-                      className="w-full p-3 border-none outline-none bg-transparent text-slate-900"
+                      className="w-full h-full px-1 border-none outline-none bg-transparent text-slate-900"
                     />
                   </div>
-                </div>
 
-                <button className="bg-rose-600 hover:bg-rose-700 text-white px-8 py-3 rounded-xl font-semibold shadow-sm transition mt-2 md:mt-0">
-                  Search Buses
-                </button>
+                  <button className="md:col-span-2 h-14 bg-rose-600 hover:bg-rose-700 text-white px-6 rounded-2xl font-semibold shadow-sm transition">
+                    Search Buses
+                  </button>
+                </div>
               </div>
 
               <div className="mt-5 flex flex-wrap gap-3">
@@ -111,6 +111,19 @@ function Hero() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-tr from-black/65 via-black/25 to-transparent" />
 
+                <div className="absolute left-6 right-6 bottom-6 rounded-3xl border border-white/15 bg-black/30 backdrop-blur p-5 text-white">
+                  <p className="text-xs font-semibold tracking-wider text-white/90">LIVE TRACKING</p>
+                  <p className="mt-2 text-xl font-extrabold">See your bus on the map, instantly</p>
+                  <p className="mt-1 text-sm text-white/90">
+                    Track location, check ETA, and stay updated during the journey.
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/10 border border-white/15">Dark Map</span>
+                    <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/10 border border-white/15">ETA</span>
+                    <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/10 border border-white/15">Alerts</span>
+                  </div>
+                </div>
+
                 <div className="relative p-6">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-extrabold text-white">Today’s Deals</p>
@@ -119,13 +132,13 @@ function Hero() {
                     </span>
                   </div>
 
-                  <div className="mt-5 rounded-2xl border border-white/20 bg-white/10 backdrop-blur p-5 text-white">
+                  <div className="mt-5 rounded-2xl border border-white/25 bg-black/45 backdrop-blur p-5 text-white">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-xs text-white/80">From</p>
                         <p className="text-lg font-extrabold">Mumbai</p>
                       </div>
-                      <div className="text-rose-600 font-extrabold">→</div>
+                      <div className="text-rose-300 font-extrabold">→</div>
                       <div className="text-right">
                         <p className="text-xs text-white/80">To</p>
                         <p className="text-lg font-extrabold">Pune</p>
@@ -134,15 +147,15 @@ function Hero() {
                   </div>
 
                   <div className="mt-4 grid grid-cols-3 gap-3">
-                    <div className="rounded-xl border border-white/20 bg-white/10 p-3">
+                    <div className="rounded-xl border border-white/20 bg-black/35 backdrop-blur p-3">
                       <p className="text-[11px] text-white/80">Discount</p>
                       <p className="mt-1 text-sm font-bold">20%</p>
                     </div>
-                    <div className="rounded-xl border border-white/20 bg-white/10 p-3">
+                    <div className="rounded-xl border border-white/20 bg-black/35 backdrop-blur p-3">
                       <p className="text-[11px] text-white/80">Starts from</p>
                       <p className="mt-1 text-sm font-bold">₹450</p>
                     </div>
-                    <div className="rounded-xl border border-white/20 bg-white/10 p-3">
+                    <div className="rounded-xl border border-white/20 bg-black/35 backdrop-blur p-3">
                       <p className="text-[11px] text-white/80">Live tracking</p>
                       <p className="mt-1 text-sm font-bold">Available</p>
                     </div>
@@ -155,11 +168,11 @@ function Hero() {
                 </div>
 
                 <div className="mt-5 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl border border-white/20 bg-white/10 backdrop-blur p-4 text-white">
+                  <div className="rounded-2xl border border-white/25 bg-black/30 backdrop-blur p-4 text-white">
                     <p className="text-xs text-white/80">Free Cancellation</p>
                     <p className="mt-1 text-sm font-bold">On select buses</p>
                   </div>
-                  <div className="rounded-2xl border border-white/20 bg-white/10 backdrop-blur p-4 text-white">
+                  <div className="rounded-2xl border border-white/25 bg-black/30 backdrop-blur p-4 text-white">
                     <p className="text-xs text-white/80">Trusted operators</p>
                     <p className="mt-1 text-sm font-bold">Top rated</p>
                   </div>
