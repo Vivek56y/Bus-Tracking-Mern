@@ -114,11 +114,12 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (!user.emailVerified) {
-      return res.status(403).json({
-        message: "Email not verified. Please verify OTP from signup.",
-      });
-    }
+    // Temporarily allow login without email verification for demo
+    // if (!user.emailVerified) {
+    //   return res.status(403).json({
+    //     message: "Email not verified. Please verify OTP from signup.",
+    //   });
+    // }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
