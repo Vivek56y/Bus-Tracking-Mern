@@ -4,7 +4,8 @@ import BusList from "./BusList";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "https://bus-tracking-mern.onrender.com";
 
 function Addbuses() {
   const [buses, setBuses] = useState([]);

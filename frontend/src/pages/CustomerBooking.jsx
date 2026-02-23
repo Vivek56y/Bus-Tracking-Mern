@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { getAuthHeader, isLoggedIn } from "../lib/auth";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "https://bus-tracking-mern.onrender.com";
 
 function CustomerBooking() {
   const navigate = useNavigate();

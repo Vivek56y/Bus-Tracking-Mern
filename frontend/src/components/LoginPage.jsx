@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { setAuthToken, setAuthUser } from "../lib/auth";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "https://bus-tracking-mern.onrender.com";
 
 function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
