@@ -10,6 +10,7 @@ import LoginPage from "./components/LoginPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import CustomerDashboard from "./pages/CustomerDashboard";
 import CustomerBooking from "./pages/CustomerBooking";
+import AdminAllBookings from "./pages/AdminAllBookings";
 import MyBookings from "./pages/MyBookings";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LiveTracking from "./pages/LiveTracking";
@@ -30,6 +31,14 @@ function App() {
             }
           />
           <Route
+            path="/admin/all-bookings"
+            element={
+              <ProtectedRoute allow={["admin"]}>
+                <AdminAllBookings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/dashboard/customer"
             element={
               <ProtectedRoute allow={["client"]}>
@@ -38,7 +47,7 @@ function App() {
             }
           />
           <Route
-            path="/dashboard/customer/bookings"
+            path="/my-bookings"
             element={
               <ProtectedRoute allow={["client"]}>
                 <MyBookings />

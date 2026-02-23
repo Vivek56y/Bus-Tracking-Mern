@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Booking = require("../models/Booking");
-const { authRequired } = require("../middleware/auth");
+const { authRequired, requireRole } = require("../middleware/auth");
 
 function normalizeSeat(seat) {
   return String(seat || "")
@@ -98,6 +98,18 @@ router.get("/my", authRequired, async (req, res) => {
   try {
     const userId = req.user?.id;
     const list = await Booking.find({ userId }).sort({ createdAt: -1 });
+    res.json(list);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Admin: get all bookings
+router.get("/", authRequired, requireRole("admin"), async (req, res) => {
+  try {
+    const list = await Booking.find()
+      .populate("userId", "name email")
+      .sort({ createdAt: -1 });
     res.json(list);
   } catch (err) {
     res.status(500).json({ message: "Server error" });

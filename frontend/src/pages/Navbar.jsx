@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { clearAuthToken, getUserRole, isLoggedIn } from "../lib/auth";
+import { clearAuthToken, getUserRole, isLoggedIn, getAuthUser, getAuthToken } from "../lib/auth";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://bus-tracking-mern.onrender.com";
@@ -13,6 +13,8 @@ function Navbar() {
   const [activeBuses, setActiveBuses] = useState(0);
   const [role, setRole] = useState(getUserRole());
   const [loggedIn, setLoggedIn] = useState(isLoggedIn());
+  const [user, setUser] = useState(null);
+  const [myBookings, setMyBookings] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -42,12 +44,16 @@ function Navbar() {
     };
   }, []);
 
-  const handleLogout = () => {
-    clearAuthToken();
-    setRole(getUserRole());
-    setLoggedIn(isLoggedIn());
-    navigate("/");
-  };
+  useEffect(() => {
+    const token = getAuthToken();
+    const authUser = getAuthUser();
+    if (token && authUser) {
+      setUser(authUser);
+    } else {
+      setUser(null);
+      setMyBookings([]);
+    }
+  }, [location]);
 
   useEffect(() => {
     axios
@@ -64,8 +70,28 @@ function Navbar() {
       .catch((err) => console.error("Error fetching bus stats:", err));
   }, []);
 
+  useEffect(() => {
+    if (user && user.role === "client") {
+      axios
+        .get(`${API_BASE_URL}/api/bookings/my`, {
+          headers: { Authorization: `Bearer ${getAuthToken()}` },
+        })
+        .then((res) => {
+          setMyBookings(res.data);
+        })
+        .catch(() => setMyBookings([]));
+    }
+  }, [user]);
+
+  const handleLogout = () => {
+    clearAuthToken();
+    setRole(getUserRole());
+    setLoggedIn(isLoggedIn());
+    navigate("/");
+  };
+
   return (
-   <nav className="w-full bg-rose-600 border-b border-rose-700 py-3.5 px-4 sm:px-6 flex justify-between items-center sticky top-0 z-50">
+    <nav className="w-full bg-rose-600 border-b border-rose-700 py-3.5 px-4 sm:px-6 flex justify-between items-center sticky top-0 z-50">
 
       {/* Left Section */}
       <div className="flex items-center gap-4">
@@ -144,19 +170,61 @@ function Navbar() {
             {showDashboardMenu && (
               <div className="absolute top-full left-0 mt-2 bg-white shadow-lg rounded-lg py-2 w-52 border border-gray-200 z-50 text-slate-900">
                 {role === "admin" ? (
-                  <Link
-                    to="/dashboard/admin"
-                    className="block px-4 py-2 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-                  >
-                    �️ Admin
-                  </Link>
+                  <>
+                    <Link
+                      to="/dashboard/admin"
+                      className="block px-4 py-2 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                    >
+                      🛠️ Admin
+                    </Link>
+                    <Link
+                      to="/admin/all-bookings"
+                      className="block px-4 py-2 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                    >
+                      📋 All Bookings
+                    </Link>
+                  </>
                 ) : (
-                  <Link
-                    to="/dashboard/customer"
-                    className="block px-4 py-2 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-                  >
-                    👤 Customer
-                  </Link>
+                  <>
+                    <Link
+                      to="/dashboard/customer"
+                      className="block px-4 py-2 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                    >
+                      👤 Customer
+                    </Link>
+                    {myBookings.length > 0 && (
+                      <Link
+                        to="/my-bookings"
+                        className="block px-4 py-2 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                      >
+                        🎫 My Bookings ({myBookings.length})
+                      </Link>
+                    )}
+                    {/* Email verification indicator */}
+                    {user && (
+                      <div className="px-4 py-2 text-xs border-t border-gray-100">
+                        {user.emailVerified ? (
+                          <span className="text-green-600 font-medium">✅ Email verified</span>
+                        ) : (
+                          <div>
+                            <span className="text-amber-600 font-medium">⚠️ Email not verified</span>
+                            <button
+                              onClick={() => {
+                                axios.post(`${API_BASE_URL}/api/auth/send-otp`, { email: user.email, role: user.role }, {
+                                  headers: { Authorization: `Bearer ${getAuthToken()}` },
+                                })
+                                .then(() => alert("OTP sent to your email."))
+                                .catch(() => alert("Failed to send OTP."));
+                              }}
+                              className="block text-rose-600 hover:underline mt-1"
+                            >
+                              Resend OTP
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
                 )}
 
                 <button
