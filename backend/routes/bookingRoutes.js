@@ -94,10 +94,13 @@ router.post("/", async (req, res) => {
 router.get("/my", async (req, res) => {
   try {
     const userId = req.query.userId || "guest";
+    console.log("Fetching bookings for userId:", userId);
     const list = await Booking.find({ userId }).sort({ createdAt: -1 });
+    console.log("Found bookings:", list.length);
     res.json(list);
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error("Error fetching bookings:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
