@@ -134,38 +134,38 @@ function CustomerBooking() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg mb-6">
+        <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 rounded-lg mb-6 shadow-lg">
           <h1 className="text-3xl font-bold">Book Your Bus Ticket</h1>
           <p className="mt-2">Search, select, and book in minutes</p>
         </div>
 
         {/* Search Form */}
-        <div className="bg-white p-6 rounded-lg shadow mb-6">
+        <div className="bg-white p-6 rounded-lg shadow-md mb-6 border border-gray-200">
           <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <input
               type="text"
               placeholder="From"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
             />
             <input
               type="text"
               placeholder="To"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
             />
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
             />
             <button
               type="submit"
               disabled={loading}
-              className="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="bg-red-600 text-white p-3 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold shadow-md"
             >
               {loading ? "Searching..." : "Search"}
             </button>
@@ -175,18 +175,24 @@ function CustomerBooking() {
         {/* Bus Results */}
         <div className="grid gap-4">
           {buses.map(bus => (
-            <div key={bus._id} className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+            <div key={bus._id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200">
               <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-xl font-bold">{bus.busNumber}</h3>
-                  <p className="text-gray-600 mt-1">{bus.route}</p>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-900">{bus.busNumber}</h3>
+                  <p className="text-gray-600 mt-1 font-medium">{bus.route}</p>
                   <p className="text-gray-600">Driver: {bus.driverName}</p>
+                  <div className="mt-2 flex gap-2">
+                    <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-semibold">Available</span>
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-semibold">WiFi</span>
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-semibold">AC</span>
+                  </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-green-600">₹450</p>
+                  <p className="text-2xl font-bold text-red-600">₹450</p>
+                  <p className="text-sm text-gray-500">per seat</p>
                   <button
                     onClick={() => openSeatModal(bus)}
-                    className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    className="mt-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-semibold shadow-md"
                   >
                     Select Seats
                   </button>
@@ -199,36 +205,36 @@ function CustomerBooking() {
         {/* Seat Selection Modal */}
         {showSeatModal && selectedBus && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-2xl">
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h2 className="text-2xl font-bold">{selectedBus.busNumber}</h2>
-                    <p className="text-gray-600">{selectedBus.route}</p>
+                    <h2 className="text-2xl font-bold text-gray-900">{selectedBus.busNumber}</h2>
+                    <p className="text-gray-600 font-medium">{selectedBus.route}</p>
                     <p className="text-gray-600">Date: {date}</p>
                   </div>
                   <button
                     onClick={() => setShowSeatModal(false)}
-                    className="text-gray-500 hover:text-gray-700 text-2xl"
+                    className="text-gray-400 hover:text-gray-600 text-2xl font-bold transition-colors"
                   >
                     ×
                   </button>
                 </div>
 
                 {bookingError && (
-                  <div className="bg-red-100 text-red-700 p-3 rounded mb-4">
+                  <div className="bg-red-100 border border-red-400 text-red-700 p-3 rounded-lg mb-4">
                     {bookingError}
                   </div>
                 )}
 
                 {bookingSuccess && (
-                  <div className="bg-green-100 text-green-700 p-3 rounded mb-4">
+                  <div className="bg-green-100 border border-green-400 text-green-700 p-3 rounded-lg mb-4">
                     {bookingSuccess}
                   </div>
                 )}
 
                 <div className="mb-4">
-                  <h3 className="font-bold mb-2">Select Seats:</h3>
+                  <h3 className="font-bold text-gray-900 mb-2">Select Seats:</h3>
                   <div className="grid grid-cols-10 gap-2">
                     {seatGrid.map(seat => {
                       const isBooked = bookedSeats.includes(seat);
@@ -238,12 +244,12 @@ function CustomerBooking() {
                           key={seat}
                           onClick={() => toggleSeat(seat)}
                           disabled={isBooked}
-                          className={`p-2 text-sm rounded ${
+                          className={`p-2 text-sm rounded-lg font-medium transition-all ${
                             isBooked 
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                               : isSelected
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-gray-100 hover:bg-gray-200'
+                              ? 'bg-red-600 text-white shadow-md'
+                              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                           }`}
                         >
                           {seat}
@@ -251,17 +257,31 @@ function CustomerBooking() {
                       );
                     })}
                   </div>
+                  <div className="mt-3 flex gap-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-gray-300 rounded"></div>
+                      <span>Booked</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-red-600 rounded"></div>
+                      <span>Selected</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-gray-100 rounded border"></div>
+                      <span>Available</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center pt-4 border-t">
                   <div>
-                    <p>Selected Seats: {selectedSeats.join(", ") || "None"}</p>
-                    <p className="text-xl font-bold">Total: ₹{450 * selectedSeats.length}</p>
+                    <p className="text-gray-600">Selected Seats: <span className="font-bold text-gray-900">{selectedSeats.join(", ") || "None"}</span></p>
+                    <p className="text-2xl font-bold text-red-600">Total: ₹{450 * selectedSeats.length}</p>
                   </div>
                   <button
                     onClick={confirmBooking}
                     disabled={selectedSeats.length === 0}
-                    className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:opacity-50"
+                    className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold shadow-md"
                   >
                     Confirm Booking
                   </button>
