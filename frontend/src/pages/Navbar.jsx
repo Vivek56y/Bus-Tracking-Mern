@@ -10,6 +10,7 @@ function Navbar() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [busCount, setBusCount] = useState(0);
   const [activeBuses, setActiveBuses] = useState(0);
+  const [authState, setAuthState] = useState({ loggedIn: isLoggedIn(), role: getUserRole() });
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -39,6 +40,16 @@ function Navbar() {
         setActiveBuses(active);
       })
       .catch((err) => console.error("Error fetching bus stats:", err));
+  }, []);
+
+  // Listen for auth state changes
+  useEffect(() => {
+    const updateAuthState = () => {
+      setAuthState({ loggedIn: isLoggedIn(), role: getUserRole() });
+    };
+
+    window.addEventListener('auth_changed', updateAuthState);
+    return () => window.removeEventListener('auth_changed', updateAuthState);
   }, []);
 
   return (
@@ -93,7 +104,7 @@ function Navbar() {
             Live Tracking
           </Link>
         </li>
-        {isLoggedIn() ? (
+        {authState.loggedIn ? (
           <>
             <li>
               <Link to="/book" className={linkClass("/book")}> 
@@ -105,7 +116,7 @@ function Navbar() {
                 My Bookings
               </Link>
             </li>
-            {getUserRole() === "admin" && (
+            {authState.role === "admin" && (
               <>
                 <li>
                   <Link to="/admin/all-bookings" className={linkClass("/admin/all-bookings")}>
@@ -124,7 +135,7 @@ function Navbar() {
                 </li>
               </>
             )}
-            {getUserRole() === "customer" && (
+            {authState.role === "customer" && (
               <li>
                 <Link to="/dashboard/customer" className={linkClass("/dashboard/customer")}>
                   Dashboard
