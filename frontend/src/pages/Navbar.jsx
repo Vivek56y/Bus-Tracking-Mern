@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { isLoggedIn, getUserRole, logoutUser } from "../lib/auth";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://bus-tracking-mern.onrender.com";
@@ -92,50 +93,92 @@ function Navbar() {
             Live Tracking
           </Link>
         </li>
-        <li>
-          <Link to="/book" className={linkClass("/book")}> 
-            Book Ticket
-          </Link>
-        </li>
-        <li>
-          <Link to="/my-bookings" className={linkClass("/my-bookings")}>
-            My Bookings
-          </Link>
-        </li>
-        <li>
-          <Link to="/admin/all-bookings" className={linkClass("/admin/all-bookings")}>
-            All Bookings
-          </Link>
-        </li>
-        <li>
-          <Link to="/AddBusForm" className={linkClass("/AddBusForm")}>
-            Add Bus
-          </Link>
-        </li>
-        <li>
-          <a href="/#offers" className="px-3 py-2 rounded-xl transition-colors text-white/90 hover:text-white hover:bg-white/10">Offers</a>
-        </li>
-        <li>
-          <Link to="/contact" className={linkClass("/contact")}> 
-            Help
-          </Link>
-        </li>
-        <li className="ml-auto">
-          <Link
-            to="/login"
-            className="bg-white text-rose-600 px-4 py-2 rounded-xl font-semibold hover:bg-rose-50 transition-colors shadow-sm"
-          >
-            Login
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/signup"
-            className="bg-rose-700 text-white px-4 py-2 rounded-xl font-semibold hover:bg-rose-800 transition-colors shadow-sm"
-          >
-            Sign Up
-          </Link>
-        </li>
+        {isLoggedIn() ? (
+          <>
+            <li>
+              <Link to="/book" className={linkClass("/book")}> 
+                Book Ticket
+              </Link>
+            </li>
+            <li>
+              <Link to="/my-bookings" className={linkClass("/my-bookings")}>
+                My Bookings
+              </Link>
+            </li>
+            {getUserRole() === "admin" && (
+              <>
+                <li>
+                  <Link to="/admin/all-bookings" className={linkClass("/admin/all-bookings")}>
+                    All Bookings
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/AddBusForm" className={linkClass("/AddBusForm")}>
+                    Add Bus
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/dashboard/admin" className={linkClass("/dashboard/admin")}>
+                    Admin Dashboard
+                  </Link>
+                </li>
+              </>
+            )}
+            {getUserRole() === "customer" && (
+              <li>
+                <Link to="/dashboard/customer" className={linkClass("/dashboard/customer")}>
+                  Dashboard
+                </Link>
+              </li>
+            )}
+            <li>
+              <a href="/#offers" className="px-3 py-2 rounded-xl transition-colors text-white/90 hover:text-white hover:bg-white/10">Offers</a>
+            </li>
+            <li>
+              <Link to="/contact" className={linkClass("/contact")}> 
+                Help
+              </Link>
+            </li>
+            <li className="ml-auto">
+              <button
+                onClick={() => {
+                  logoutUser();
+                  navigate("/");
+                }}
+                className="bg-white text-rose-600 px-4 py-2 rounded-xl font-semibold hover:bg-rose-50 transition-colors shadow-sm"
+              >
+                Logout
+              </button>
+            </li>
+          </>
+        ) : (
+          <>
+            <li>
+              <a href="/#offers" className="px-3 py-2 rounded-xl transition-colors text-white/90 hover:text-white hover:bg-white/10">Offers</a>
+            </li>
+            <li>
+              <Link to="/contact" className={linkClass("/contact")}> 
+                Help
+              </Link>
+            </li>
+            <li className="ml-auto">
+              <Link
+                to="/Login"
+                className="bg-white text-rose-600 px-4 py-2 rounded-xl font-semibold hover:bg-rose-50 transition-colors shadow-sm"
+              >
+                Login
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/Signup"
+                className="bg-rose-700 text-white px-4 py-2 rounded-xl font-semibold hover:bg-rose-800 transition-colors shadow-sm"
+              >
+                Sign Up
+              </Link>
+            </li>
+          </>
+        )}
       </ul>
     </nav>
   );

@@ -10,6 +10,11 @@ import CustomerBooking from "./pages/CustomerBooking";
 import MyBookings from "./pages/MyBookings";
 import AdminAllBookings from "./pages/AdminAllBookings";
 import LiveTracking from "./pages/LiveTracking";
+import LoginPage from "./components/LoginPage";
+import SignupPage from "./components/SignupPage";
+import AdminDashboard from "./pages/AdminDashboard";
+import CustomerDashboard from "./pages/CustomerDashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -18,10 +23,46 @@ function App() {
       <div>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/book" element={<CustomerBooking />} />
-          <Route path="/my-bookings" element={<MyBookings />} />
-          <Route path="/admin/all-bookings" element={<AdminAllBookings />} />
-          <Route path="/AddBusForm" element={<AddBusForm />} />
+          <Route path="/Login" element={<LoginPage />} />
+          <Route path="/Signup" element={<SignupPage />} />
+          
+          {/* Protected Routes */}
+          <Route path="/book" element={
+            <ProtectedRoute allow={["admin", "customer"]}>
+              <CustomerBooking />
+            </ProtectedRoute>
+          } />
+          <Route path="/my-bookings" element={
+            <ProtectedRoute allow={["admin", "customer"]}>
+              <MyBookings />
+            </ProtectedRoute>
+          } />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/all-bookings" element={
+            <ProtectedRoute allow={["admin"]}>
+              <AdminAllBookings />
+            </ProtectedRoute>
+          } />
+          <Route path="/AddBusForm" element={
+            <ProtectedRoute allow={["admin"]}>
+              <AddBusForm />
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/admin" element={
+            <ProtectedRoute allow={["admin"]}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          
+          {/* Customer Routes */}
+          <Route path="/dashboard/customer" element={
+            <ProtectedRoute allow={["customer"]}>
+              <CustomerDashboard />
+            </ProtectedRoute>
+          } />
+          
+          {/* Public Routes */}
           <Route path="/BusList" element={<BusList />} />
           <Route path="/BusMapPreview" element={<LiveTracking />} />
           <Route path="/contact" element={<Contact />} />

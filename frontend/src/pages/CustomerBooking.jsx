@@ -15,6 +15,7 @@ function CustomerBooking() {
   const [showSeatModal, setShowSeatModal] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState("");
   const [bookingError, setBookingError] = useState("");
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   // Load buses on component mount
   useEffect(() => {
@@ -115,6 +116,11 @@ function CustomerBooking() {
     } catch (err) {
       setBookingError(err.response?.data?.message || "Booking failed");
     }
+  };
+
+  // Auth prompt handler for compatibility
+  const setAuthPromptOpen = (show) => {
+    setShowLoginModal(show);
   };
 
   const seatGrid = [];
