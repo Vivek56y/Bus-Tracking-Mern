@@ -10,7 +10,7 @@ function Navbar() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [busCount, setBusCount] = useState(0);
   const [activeBuses, setActiveBuses] = useState(0);
-  const [authState, setAuthState] = useState({ loggedIn: isLoggedIn(), role: getUserRole() });
+  const [authState, setAuthState] = useState({ loggedIn: false, role: null });
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -48,6 +48,9 @@ function Navbar() {
       setAuthState({ loggedIn: isLoggedIn(), role: getUserRole() });
     };
 
+    // Check auth state on mount
+    updateAuthState();
+    
     window.addEventListener('auth_changed', updateAuthState);
     return () => window.removeEventListener('auth_changed', updateAuthState);
   }, []);
