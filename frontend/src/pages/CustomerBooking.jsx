@@ -17,6 +17,10 @@ function CustomerBooking() {
   const [loading, setLoading] = useState(false);
   const [buses, setBuses] = useState([]);
   const [filteredBuses, setFilteredBuses] = useState([]);
+  const [busType, setBusType] = useState("all");
+  const [maxPrice, setMaxPrice] = useState(700);
+  const [departure, setDeparture] = useState("any");
+  const [sortBy, setSortBy] = useState("recommended");
 
   const [seatModalOpen, setSeatModalOpen] = useState(false);
   const [activeRoute, setActiveRoute] = useState(null);
@@ -200,7 +204,6 @@ function CustomerBooking() {
     try {
       const res = await axios.get(`${API_BASE_URL}/api/buses`);
       setBuses(res.data);
-      setFilteredBuses(res.data);
     } catch (err) {
       console.error("Failed to fetch buses:", err);
     } finally {
@@ -208,23 +211,21 @@ function CustomerBooking() {
     }
   };
 
-  const filteredRoutes = useMemo(() => {
-    let list = popularRoutes;
+  const filteredBusesData = useMemo(() => {
+    let list = buses;
 
+    // Filter by route text if search applied
     const f = (hasSearched ? appliedFrom : "").trim().toLowerCase();
     const t = (hasSearched ? appliedTo : "").trim().toLowerCase();
-    if (f) list = list.filter((r) => r.from.toLowerCase().includes(f));
-    if (t) list = list.filter((r) => r.to.toLowerCase().includes(t));
+    if (f) list = list.filter((bus) => bus.route.toLowerCase().includes(f));
+    if (t) list = list.filter((bus) => bus.route.toLowerCase().includes(t));
 
-    if (busType !== "all") list = list.filter((r) => r.type === busType);
-    if (departure !== "any") list = list.filter((r) => r.dep === departure);
+    // No busType filtering for real buses since they don't have type field
+    // if (busType !== "all") list = list.filter((bus) => bus.type === busType);
 
-    list = list.filter((r) => r.price <= maxPrice);
-
-    if (sortBy === "price_low") list = [...list].sort((a, b) => a.price - b.price);
-    if (sortBy === "price_high") list = [...list].sort((a, b) => b.price - a.price);
+    if (sortBy === "recommended") return list; // Keep original order
     return list;
-  }, [popularRoutes, appliedFrom, appliedTo, hasSearched, busType, maxPrice, departure, sortBy]);
+  }, [buses, appliedFrom, appliedTo, hasSearched, busType, sortBy]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-rose-50/30 to-white">
@@ -423,7 +424,7 @@ function CustomerBooking() {
                     Bus Results
                   </h2>
                   <p className="mt-1 text-sm text-slate-600">
-                    {filteredBuses.length} buses found
+                    {filteredBusesData.length} buses found
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -449,7 +450,7 @@ function CustomerBooking() {
                   </div>
                 )}
 
-                {!loading && filteredBuses.length === 0 ? (
+                {!loading && filteredBusesData.length === 0 ? (
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-slate-700">
                     {hasSearched && (appliedFrom.trim() || appliedTo.trim()) ? (
                       <div>
@@ -468,7 +469,7 @@ function CustomerBooking() {
                     )}
                   </div>
                 ) : (
-                  filteredBuses.map((bus) => (
+                  filteredBusesData.map((bus) => (
                     <div
                       key={bus._id}
                       className="rounded-3xl border border-slate-100 bg-white p-5 sm:p-6 shadow-sm hover:shadow-md transition"
