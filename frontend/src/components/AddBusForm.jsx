@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+  import.meta.env.VITE_API_BASE_URL || "https://bus-tracking-mern.onrender.com";
 
 function AddBusForm({ addBusToList = () => {} }) {
   const [busNumber, setBusNumber] = useState("");
@@ -12,7 +12,7 @@ function AddBusForm({ addBusToList = () => {} }) {
   const [longitude, setLongitude] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!busNumber || !driverName || !route || !latitude || !longitude) {
