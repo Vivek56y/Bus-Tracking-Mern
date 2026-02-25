@@ -25,6 +25,7 @@ function App() {
           <Route path="/BusList" element={<BusList />} />
           <Route path="/BusMapPreview" element={<LiveTracking />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="*" element={<Home />} />
         </Routes>
       </div>
     </div>
