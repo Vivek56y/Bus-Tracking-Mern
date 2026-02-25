@@ -48,7 +48,7 @@ router.post("/signup", async (req, res) => {
     if (!name || !email || !password)
       return res.status(400).json({ message: "All fields are required" });
 
-    let userRole = "client";
+    let userRole = "customer";
     if (role === "admin") {
       const requiredKey = (process.env.ADMIN_SIGNUP_KEY || "").trim();
       const providedKey = (adminKey || "").trim();
