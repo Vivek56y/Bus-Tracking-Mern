@@ -150,18 +150,18 @@ function MyBookings() {
                           </span>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 flex items-center justify-between gap-3 flex-wrap">
-                      <p className="text-sm text-slate-700">
-                        Booking ID: <span className="font-extrabold text-slate-900">{b._id}</span>
-                      </p>
-                      <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700">
-                        {formatTime(b.createdAt)}
-                      </span>
+                      <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 flex items-center justify-between gap-3 flex-wrap">
+                        <p className="text-sm text-slate-700">
+                          Booking ID: <span className="font-extrabold text-slate-900">{b._id}</span>
+                        </p>
+                        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700">
+                          {formatTime(b.createdAt)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
             </div>
           </div>
