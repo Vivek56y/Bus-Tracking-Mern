@@ -9,7 +9,7 @@ const API_BASE_URL =
 function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [signupStep, setSignupStep] = useState("form");
-  const [loginAs, setLoginAs] = useState("client");
+  const [loginAs, setLoginAs] = useState("customer");
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -45,7 +45,7 @@ function AuthPage() {
         if (loginAs === "admin" && role !== "admin") {
           return setError("Please login using a valid Admin account.");
         }
-        if (loginAs === "client" && role !== "client") {
+        if (loginAs === "customer" && role !== "customer") {
           return setError("Please login using a valid Customer account.");
         }
 
@@ -148,9 +148,9 @@ function AuthPage() {
         <div className="mb-5 grid grid-cols-2 gap-2">
           <button
             type="button"
-            onClick={() => setLoginAs("client")}
+            onClick={() => setLoginAs("customer")}
             className={`px-4 py-2.5 rounded-xl font-semibold border transition-colors ${
-              loginAs === "client"
+              loginAs === "customer"
                 ? "bg-rose-600 text-white border-rose-600"
                 : "bg-white text-slate-900 border-slate-200 hover:bg-slate-50"
             }`}
