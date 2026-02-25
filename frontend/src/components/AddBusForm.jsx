@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { getAuthHeader } from "../lib/auth";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://bus-tracking-mern.onrender.com";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 function AddBusForm({ addBusToList = () => {} }) {
   const [busNumber, setBusNumber] = useState("");
@@ -29,25 +28,20 @@ function AddBusForm({ addBusToList = () => {} }) {
       longitude: parseFloat(longitude),
     };
 
-    axios
-      .post(`${API_BASE_URL}/api/buses`, newBus, { headers: getAuthHeader() })
-      .then((res) => {
-        addBusToList(res.data); // ✅ will work now
-        setBusNumber("");
-        setDriverName("");
-        setRoute("");
-        setLatitude("");
-        setLongitude("");
-        setError("");
-      })
-      .catch((err) => {
-        const status = err?.response?.status;
-        if (status === 401 || status === 403) {
-          setError("Admin login required to add buses.");
-        } else {
-          setError(`Error adding bus: ${err.message}`);
-        }
-      });
+    try {
+      await axios.post(`${API_BASE_URL}/api/buses`, newBus);
+      addBusToList(newBus);
+      // Reset form
+      setBusNumber("");
+      setDriverName("");
+      setRoute("");
+      setLatitude("");
+      setLongitude("");
+      setError("");
+      alert("Bus added successfully!");
+    } catch (err) {
+      setError("Failed to add bus.");
+    }
   };
 
   return (

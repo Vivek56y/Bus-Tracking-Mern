@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { getAuthHeader } from "../lib/auth";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://bus-tracking-mern.onrender.com";
@@ -26,34 +25,18 @@ function MyBookings() {
 
   useEffect(() => {
     let mounted = true;
-
-    async function load() {
-      setLoading(true);
-      setError("");
+    const fetchBookings = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/api/bookings/my`, {
-          headers: getAuthHeader(),
-        });
-        if (!mounted) return;
-        setBookings(Array.isArray(res.data) ? res.data : []);
+        const res = await axios.get(`${API_BASE_URL}/api/bookings/my?userId=guest`);
+        if (mounted) setBookings(res.data);
       } catch (err) {
-        if (!mounted) return;
-        const status = err?.response?.status;
-        if (status === 401) {
-          setError("Please login to view your bookings.");
-        } else {
-          setError("Failed to load bookings. Please try again.");
-        }
+        if (mounted) setError("Failed to fetch bookings.");
       } finally {
-        if (!mounted) return;
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
-    }
-
-    load();
-    return () => {
-      mounted = false;
     };
+    fetchBookings();
+    return () => { mounted = false; };
   }, []);
 
   const summary = useMemo(() => {

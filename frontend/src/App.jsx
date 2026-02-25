@@ -6,15 +6,11 @@ import Home from "./pages/Home";
 import Contact from "./components/Contact";
 import BusList from "./pages/BusList";
 import AddBusForm from "./components/AddBusForm";
-import LoginPage from "./components/LoginPage";
-import AdminDashboard from "./pages/AdminDashboard";
-import CustomerDashboard from "./pages/CustomerDashboard";
 import CustomerBooking from "./pages/CustomerBooking";
-import AdminAllBookings from "./pages/AdminAllBookings";
 import MyBookings from "./pages/MyBookings";
-import ProtectedRoute from "./components/ProtectedRoute";
+import AdminAllBookings from "./pages/AdminAllBookings";
 import LiveTracking from "./pages/LiveTracking";
-// import SignupPage from "./components/SignupPage";
+
 function App() {
   return (
     <Router>
@@ -22,61 +18,13 @@ function App() {
       <div>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route
-            path="/dashboard/admin"
-            element={
-              <ProtectedRoute allow={["admin"]}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/all-bookings"
-            element={
-              <ProtectedRoute allow={["admin"]}>
-                <AdminAllBookings />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/customer"
-            element={
-              <ProtectedRoute allow={["client"]}>
-                <CustomerDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/my-bookings"
-            element={
-              <ProtectedRoute allow={["client"]}>
-                <MyBookings />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/book"
-            element={<CustomerBooking />}
-          />
-
-          {/* Backward compatibility */}
-          <Route
-            path="/Addbuses"
-            element={
-              <ProtectedRoute allow={["admin"]}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/BusMapPreview"
-            element={<LiveTracking />}
-          />
-          <Route path="/contact" element={<Contact />} />
+          <Route path="/book" element={<CustomerBooking />} />
+          <Route path="/my-bookings" element={<MyBookings />} />
+          <Route path="/admin/all-bookings" element={<AdminAllBookings />} />
           <Route path="/AddBusForm" element={<AddBusForm />} />
-          <Route path="/BusList" element={<BusList />}/>
-          <Route path="/Login" element={<LoginPage/>}/>
-           {/* <Route path="/signup" element={<SignupPage />} />  */}
+          <Route path="/BusList" element={<BusList />} />
+          <Route path="/BusMapPreview" element={<LiveTracking />} />
+          <Route path="/contact" element={<Contact />} />
         </Routes>
       </div>
     </Router>

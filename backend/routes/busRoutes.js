@@ -1,7 +1,6 @@
 const express = require("express");
 const Bus = require("../models/Bus.js");
 const router = express.Router();
-const { authRequired, requireRole } = require("../middleware/auth");
 
 function parseNumber(value) {
   const num = typeof value === "string" ? parseFloat(value) : value;
@@ -34,7 +33,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", authRequired, requireRole("admin"), async (req, res) => {
+router.post("/", async (req, res) => {
   const {
     busNumber,
     driverName,
@@ -80,7 +79,7 @@ router.post("/", authRequired, requireRole("admin"), async (req, res) => {
   }
 });
 
-router.put("/:id", authRequired, requireRole("admin"), async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const updatedBus = await Bus.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -95,7 +94,7 @@ router.put("/:id", authRequired, requireRole("admin"), async (req, res) => {
   }
 });
 
-router.delete("/:id", authRequired, requireRole("admin"), async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     const deleted = await Bus.findByIdAndDelete(req.params.id);
     if (!deleted) {

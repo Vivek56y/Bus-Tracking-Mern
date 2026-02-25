@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { getAuthToken } from "../lib/auth";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://bus-tracking-mern.onrender.com";
@@ -13,9 +12,7 @@ function AdminAllBookings() {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/api/bookings`, {
-          headers: { Authorization: `Bearer ${getAuthToken()}` },
-        });
+        const res = await axios.get(`${API_BASE_URL}/api/bookings`);
         setBookings(res.data);
       } catch (err) {
         setError("Failed to fetch bookings.");
