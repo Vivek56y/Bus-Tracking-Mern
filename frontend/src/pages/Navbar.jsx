@@ -143,9 +143,6 @@ function Navbar() {
               </li>
             )}
             <li>
-              <a href="/#offers" className="px-3 py-2 rounded-xl transition-colors text-white/90 hover:text-white hover:bg-white/10">Offers</a>
-            </li>
-            <li>
               <Link to="/contact" className={linkClass("/contact")}> 
                 Help
               </Link>
@@ -165,28 +162,17 @@ function Navbar() {
         ) : (
           <>
             <li>
-              <a href="/#offers" className="px-3 py-2 rounded-xl transition-colors text-white/90 hover:text-white hover:bg-white/10">Offers</a>
-            </li>
-            <li>
               <Link to="/contact" className={linkClass("/contact")}> 
                 Help
               </Link>
             </li>
             <li className="ml-auto">
-              <Link
-                to="/Login"
+              <button
+                onClick={() => navigate("/Login")}
                 className="bg-white text-rose-600 px-4 py-2 rounded-xl font-semibold hover:bg-rose-50 transition-colors shadow-sm"
               >
-                Login
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/Signup"
-                className="bg-rose-700 text-white px-4 py-2 rounded-xl font-semibold hover:bg-rose-800 transition-colors shadow-sm"
-              >
-                Sign Up
-              </Link>
+                Login / Signup
+              </button>
             </li>
           </>
         )}

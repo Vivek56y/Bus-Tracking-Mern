@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { isLoggedIn, getAuthUser } from "../lib/auth";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://bus-tracking-mern.onrender.com";
@@ -22,12 +24,21 @@ function MyBookings() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [bookings, setBookings] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Check if user is logged in
+    if (!isLoggedIn()) {
+      navigate("/Login");
+      return;
+    }
+
     let mounted = true;
     const fetchBookings = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/api/bookings/my?userId=guest`);
+        const user = getAuthUser();
+        const userId = user?._id || user?.id || "guest";
+        const res = await axios.get(`${API_BASE_URL}/api/bookings/my?userId=${userId}`);
         if (mounted) setBookings(res.data);
       } catch (err) {
         if (mounted) setError("Failed to fetch bookings.");
@@ -37,7 +48,7 @@ function MyBookings() {
     };
     fetchBookings();
     return () => { mounted = false; };
-  }, []);
+  }, [navigate]);
 
   const summary = useMemo(() => {
     const confirmed = bookings.filter((b) => b.status === "confirmed").length;

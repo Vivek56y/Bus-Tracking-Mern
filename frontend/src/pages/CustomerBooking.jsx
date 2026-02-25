@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { isLoggedIn, getAuthUser } from "../lib/auth";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://bus-tracking-mern.onrender.com";
 
@@ -16,6 +18,7 @@ function CustomerBooking() {
   const [bookingSuccess, setBookingSuccess] = useState("");
   const [bookingError, setBookingError] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const navigate = useNavigate();
 
   // Load buses on component mount
   useEffect(() => {
@@ -57,6 +60,14 @@ function CustomerBooking() {
       alert("Please select a travel date first");
       return;
     }
+    
+    // Check if user is logged in
+    if (!isLoggedIn()) {
+      alert("Please login to book a bus");
+      navigate("/Login");
+      return;
+    }
+    
     setSelectedBus(bus);
     setShowSeatModal(true);
     setBookingError("");
@@ -97,13 +108,15 @@ function CustomerBooking() {
     setBookingSuccess("");
     
     try {
+      const user = getAuthUser();
       const payload = {
         routeId: selectedBus._id,
         from: selectedBus.route.split(' → ')[0] || 'Origin',
         to: selectedBus.route.split(' → ')[1] || 'Destination',
         travelDate: date,
         seats: selectedSeats,
-        amount: 450 * selectedSeats.length
+        amount: 450 * selectedSeats.length,
+        userId: user?._id || user?.id // Include user ID
       };
 
       const res = await axios.post(`${API_BASE_URL}/api/bookings`, payload);

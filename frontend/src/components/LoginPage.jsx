@@ -10,6 +10,7 @@ function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [signupStep, setSignupStep] = useState("form");
   const [loginAs, setLoginAs] = useState("customer");
+  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -145,29 +146,44 @@ function AuthPage() {
           {isLogin ? "Login" : signupStep === "otp" ? "Verify OTP" : "Create Account"}
         </h2>
 
-        <div className="mb-5 grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => setLoginAs("customer")}
-            className={`px-4 py-2.5 rounded-xl font-semibold border transition-colors ${
-              loginAs === "customer"
-                ? "bg-rose-600 text-white border-rose-600"
-                : "bg-white text-slate-900 border-slate-200 hover:bg-slate-50"
-            }`}
-          >
-            Customer
-          </button>
-          <button
-            type="button"
-            onClick={() => setLoginAs("admin")}
-            className={`px-4 py-2.5 rounded-xl font-semibold border transition-colors ${
-              loginAs === "admin"
-                ? "bg-slate-900 text-white border-slate-900"
-                : "bg-white text-slate-900 border-slate-200 hover:bg-slate-50"
-            }`}
-          >
-            Admin
-          </button>
+        <div className="mb-5">
+          <label className="block text-gray-700 font-medium mb-2">Select Role</label>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowRoleDropdown(!showRoleDropdown)}
+              className="w-full px-4 py-2.5 rounded-xl font-semibold border border-slate-200 bg-white text-slate-900 hover:bg-slate-50 transition-colors flex justify-between items-center"
+            >
+              <span>{loginAs === "customer" ? "Customer" : "Admin"}</span>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {showRoleDropdown && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginAs("customer");
+                    setShowRoleDropdown(false);
+                  }}
+                  className="w-full px-4 py-2.5 text-left hover:bg-slate-50 rounded-t-xl"
+                >
+                  Customer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginAs("admin");
+                    setShowRoleDropdown(false);
+                  }}
+                  className="w-full px-4 py-2.5 text-left hover:bg-slate-50 rounded-b-xl"
+                >
+                  Admin
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
