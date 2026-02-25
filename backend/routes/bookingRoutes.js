@@ -37,8 +37,7 @@ router.get("/seats", async (req, res) => {
 // Create booking
 router.post("/", async (req, res) => {
   try {
-    const userId = req.body.userId || "guest"; // Allow guest bookings
-    const { routeId, from, to, travelDate, seats, amount } = req.body;
+    const { routeId, from, to, travelDate, seats, amount, userId } = req.body;
 
     if (!routeId || !from || !to || !travelDate) {
       return res.status(400).json({ message: "routeId, from, to, travelDate are required" });
@@ -50,41 +49,33 @@ router.post("/", async (req, res) => {
     }
 
     // Check if any seat already booked
-    const existing = await Booking.find({
-      routeId: String(routeId),
-      travelDate: String(travelDate),
+    const existing = await Booking.findOne({
+      routeId,
+      travelDate,
       status: "confirmed",
       seats: { $in: seatList },
-    }).select("seats");
+    });
 
-    if (existing.length > 0) {
-      const taken = new Set();
-      for (const b of existing) {
-        for (const s of b.seats || []) {
-          const ns = normalizeSeat(s);
-          if (seatList.includes(ns)) taken.add(ns);
-        }
-      }
+    if (existing) {
+      const taken = existing.seats.filter((s) => seatList.includes(normalizeSeat(s)));
       return res.status(409).json({
-        message: "Some selected seats are already booked",
-        takenSeats: Array.from(taken),
+        message: "Some seats are already booked",
+        takenSeats: taken,
       });
     }
 
-    const safeAmount = typeof amount === "number" ? amount : Number(amount);
-
-    const booking = await Booking.create({
-      userId,
-      routeId: String(routeId),
-      from: String(from),
-      to: String(to),
-      travelDate: String(travelDate),
+    const booking = new Booking({
+      routeId,
+      from,
+      to,
+      travelDate,
       seats: seatList,
-      amount: Number.isFinite(safeAmount) ? safeAmount : 0,
+      amount,
       status: "confirmed",
     });
 
-    res.status(201).json({ message: "Booking confirmed", booking });
+    const saved = await booking.save();
+    res.status(201).json({ message: "Booking confirmed", booking: saved });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
@@ -95,7 +86,11 @@ router.get("/my", async (req, res) => {
   try {
     const userId = req.query.userId || "guest";
     console.log("Fetching bookings for userId:", userId);
-    const list = await Booking.find({ userId }).sort({ createdAt: -1 });
+    
+    // For guests, find bookings without userId
+    const query = userId === "guest" ? { userId: { $exists: false } } : { userId };
+    const list = await Booking.find(query).sort({ createdAt: -1 });
+    
     console.log("Found bookings:", list.length);
     res.json(list);
   } catch (err) {
