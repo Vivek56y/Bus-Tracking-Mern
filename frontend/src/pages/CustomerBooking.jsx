@@ -76,13 +76,11 @@ function CustomerBooking() {
     setSeatLoading(false);
     setBookingLoading(false);
     setBookingSuccess("");
-    setAuthPromptOpen(false);
   };
 
   const openSeatModal = async (route) => {
     setSeatError("");
     setBookingSuccess("");
-    setAuthPromptOpen(false);
 
     if (!date) {
       setSeatError("Please select a travel date first.");
@@ -96,7 +94,7 @@ function CustomerBooking() {
 
     try {
       const res = await axios.get(`${API_BASE_URL}/api/bookings/seats`, {
-        params: { routeId: route.id, travelDate: date },
+        params: { routeId: route._id, travelDate: date },
       });
       setBookedSeats((res.data?.bookedSeats || []).map(normalizeSeat));
     } catch (err) {
@@ -120,14 +118,13 @@ function CustomerBooking() {
   };
 
   const totalAmount = useMemo(() => {
-    const base = activeRoute?.price || 0;
+    const base = 450; // Fixed price per seat
     return base * selectedSeats.length;
-  }, [activeRoute, selectedSeats.length]);
+  }, [selectedSeats.length]);
 
   const onConfirmBooking = async () => {
     setSeatError("");
     setBookingSuccess("");
-    setAuthPromptOpen(false);
 
     if (!activeRoute) {
       setSeatError("Please select a bus first.");
@@ -141,20 +138,17 @@ function CustomerBooking() {
       setSeatError("Please select at least one seat.");
       return;
     }
-    if (!isLoggedIn()) {
-      setAuthPromptOpen(true);
-      return;
-    }
 
     setBookingLoading(true);
     try {
       const payload = {
-        routeId: activeRoute.id,
-        from: activeRoute.from,
-        to: activeRoute.to,
+        routeId: activeRoute._id,
+        from: activeRoute.route.split(' → ')[0] || 'Origin',
+        to: activeRoute.route.split(' → ')[1] || 'Destination',
         travelDate: date,
         seats: selectedSeats,
         amount: totalAmount,
+        userId: "guest",
       };
 
       const res = await axios.post(`${API_BASE_URL}/api/bookings`, payload);

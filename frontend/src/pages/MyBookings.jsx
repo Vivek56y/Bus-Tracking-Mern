@@ -89,39 +89,47 @@ function MyBookings() {
 
             <div className="mt-5 grid gap-4">
               {loading ? (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-slate-700">
-                  Loading your bookings…
+                <div className="flex justify-center items-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-600"></div>
                 </div>
               ) : bookings.length === 0 ? (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-slate-700">
-                  <p className="font-bold text-slate-900">No bookings yet.</p>
-                  <p className="mt-1 text-sm text-slate-600">Book your first ticket to see it here.</p>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center">
+                  <p className="font-bold text-slate-900 text-lg">No bookings yet.</p>
+                  <p className="mt-2 text-sm text-slate-600">Book your first ticket to see it here.</p>
+                  <Link
+                    to="/book"
+                    className="inline-block mt-4 bg-rose-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-rose-700 transition-colors"
+                  >
+                    Book Now
+                  </Link>
                 </div>
               ) : (
-                bookings.map((b) => (
-                  <div
-                    key={b._id}
-                    className="rounded-3xl border border-slate-100 bg-white p-5 sm:p-6 shadow-sm"
-                  >
-                    <div className="flex items-start justify-between gap-4 flex-wrap">
-                      <div>
-                        <p className="text-lg font-extrabold text-slate-900">
-                          {b.from} <span className="text-rose-600">→</span> {b.to}
-                        </p>
-                        <p className="mt-1 text-sm text-slate-600">
-                          Travel date: <span className="font-semibold text-slate-900">{formatDate(b.travelDate)}</span>
-                        </p>
-                        <p className="mt-1 text-sm text-slate-600">
-                          Seats: <span className="font-semibold text-slate-900">{(b.seats || []).join(", ")}</span>
-                        </p>
-                      </div>
+                <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+                  {bookings.map((b) => (
+                    <div
+                      key={b._id}
+                      className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <p className="text-lg font-extrabold text-slate-900">
+                            {b.from} <span className="text-rose-600">→</span> {b.to}
+                          </p>
+                          <p className="mt-2 text-sm text-slate-600">
+                            📅 {formatDate(b.travelDate)}
+                          </p>
+                          <p className="mt-1 text-sm text-slate-600">
+                            💺 Seats: <span className="font-semibold text-slate-900">{(b.seats || []).join(", ")}</span>
+                          </p>
+                          <p className="mt-1 text-sm text-slate-600">
+                            🆔 Booking: {b._id.slice(-8).toUpperCase()}
+                          </p>
+                        </div>
 
-                      <div className="text-right">
-                        <p className="text-2xl font-extrabold text-slate-900">₹{b.amount ?? 0}</p>
-                        <p className="text-xs text-slate-500">Paid</p>
-                        <div className="mt-2">
+                        <div className="text-right">
+                          <p className="text-2xl font-extrabold text-slate-900">₹{b.amount ?? 0}</p>
                           <span
-                            className={`text-xs font-extrabold px-2.5 py-1 rounded-full border ${
+                            className={`inline-block mt-2 text-xs font-extrabold px-3 py-1 rounded-full border ${
                               b.status === "confirmed"
                                 ? "bg-emerald-50 text-emerald-700 border-emerald-100"
                                 : "bg-slate-50 text-slate-700 border-slate-200"

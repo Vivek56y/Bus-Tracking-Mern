@@ -120,6 +120,22 @@ function Navbar() {
             Help
           </Link>
         </li>
+        <li className="ml-auto">
+          <Link
+            to="/login"
+            className="bg-white text-rose-600 px-4 py-2 rounded-xl font-semibold hover:bg-rose-50 transition-colors shadow-sm"
+          >
+            Login
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/signup"
+            className="bg-rose-700 text-white px-4 py-2 rounded-xl font-semibold hover:bg-rose-800 transition-colors shadow-sm"
+          >
+            Sign Up
+          </Link>
+        </li>
       </ul>
     </nav>
   );
