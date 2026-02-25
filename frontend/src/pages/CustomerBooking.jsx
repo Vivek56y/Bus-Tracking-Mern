@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { getAuthHeader, isLoggedIn } from "../lib/auth";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://bus-tracking-mern.onrender.com";
@@ -15,10 +14,9 @@ function CustomerBooking() {
   const [appliedTo, setAppliedTo] = useState("");
   const [appliedDate, setAppliedDate] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
-  const [busType, setBusType] = useState("all");
-  const [maxPrice, setMaxPrice] = useState(700);
-  const [departure, setDeparture] = useState("any");
-  const [sortBy, setSortBy] = useState("recommended");
+  const [loading, setLoading] = useState(false);
+  const [buses, setBuses] = useState([]);
+  const [filteredBuses, setFilteredBuses] = useState([]);
 
   const [seatModalOpen, setSeatModalOpen] = useState(false);
   const [activeRoute, setActiveRoute] = useState(null);
@@ -28,7 +26,6 @@ function CustomerBooking() {
   const [seatLoading, setSeatLoading] = useState(false);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState("");
-  const [authPromptOpen, setAuthPromptOpen] = useState(false);
 
   const popularRoutes = useMemo(
     () => [
@@ -156,9 +153,7 @@ function CustomerBooking() {
         amount: totalAmount,
       };
 
-      const res = await axios.post(`${API_BASE_URL}/api/bookings`, payload, {
-        headers: getAuthHeader(),
-      });
+      const res = await axios.post(`${API_BASE_URL}/api/bookings`, payload);
 
       const confirmed = res.data?.booking;
       setBookingSuccess(
@@ -172,9 +167,7 @@ function CustomerBooking() {
       setSelectedSeats([]);
     } catch (err) {
       const status = err?.response?.status;
-      if (status === 401) {
-        setAuthPromptOpen(true);
-      } else if (status === 409) {
+      if (status === 409) {
         const taken = err?.response?.data?.takenSeats;
         setSeatError(
           taken?.length
@@ -193,12 +186,26 @@ function CustomerBooking() {
     }
   };
 
-  const onSearch = (e) => {
+  const onSearch = async (e) => {
     e.preventDefault();
+    if (!from || !to || !date) {
+      alert("Please fill in From, To, and Date");
+      return;
+    }
+    setLoading(true);
     setAppliedFrom(from);
     setAppliedTo(to);
     setAppliedDate(date);
     setHasSearched(true);
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/buses`);
+      setBuses(res.data);
+      setFilteredBuses(res.data);
+    } catch (err) {
+      console.error("Failed to fetch buses:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filteredRoutes = useMemo(() => {
@@ -416,7 +423,7 @@ function CustomerBooking() {
                     Bus Results
                   </h2>
                   <p className="mt-1 text-sm text-slate-600">
-                    {filteredRoutes.length} options found
+                    {filteredBuses.length} buses found
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -436,7 +443,13 @@ function CustomerBooking() {
               </div>
 
               <div className="mt-5 grid gap-4">
-                {filteredRoutes.length === 0 ? (
+                {loading && (
+                  <div className="flex justify-center items-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-600"></div>
+                  </div>
+                )}
+
+                {!loading && filteredBuses.length === 0 ? (
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-slate-700">
                     {hasSearched && (appliedFrom.trim() || appliedTo.trim()) ? (
                       <div>
@@ -455,9 +468,9 @@ function CustomerBooking() {
                     )}
                   </div>
                 ) : (
-                  filteredRoutes.map((r) => (
+                  filteredBuses.map((bus) => (
                     <div
-                      key={r.id}
+                      key={bus._id}
                       className="rounded-3xl border border-slate-100 bg-white p-5 sm:p-6 shadow-sm hover:shadow-md transition"
                     >
                       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -472,10 +485,10 @@ function CustomerBooking() {
                           </div>
                         <div>
                           <p className="text-lg font-extrabold text-slate-900">
-                            {r.from} <span className="text-rose-600">→</span> {r.to}
+                            {bus.busNumber} • {bus.route}
                           </p>
                           <p className="mt-1 text-sm text-slate-600">
-                            {r.type} • {r.dep} • Duration: <span className="font-semibold text-slate-900">{r.time}</span>
+                            Driver: {bus.driverName} • Available Now
                           </p>
 
                           <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -509,12 +522,12 @@ function CustomerBooking() {
                         </div>
 
                         <div className="text-right">
-                          <p className="text-2xl font-extrabold text-slate-900">₹{r.price}</p>
+                          <p className="text-2xl font-extrabold text-slate-900">₹450</p>
                           <p className="text-xs text-slate-500">Onwards</p>
                           <div className="mt-3 flex justify-end">
                             <button
                               type="button"
-                              onClick={() => openSeatModal(r)}
+                              onClick={() => openSeatModal(bus)}
                               className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl font-semibold shadow-sm transition"
                             >
                               View Seats
@@ -587,31 +600,6 @@ function CustomerBooking() {
                 {seatError ? <p className="text-rose-600 text-sm font-semibold">{seatError}</p> : null}
                 {bookingSuccess ? (
                   <p className="mt-2 text-emerald-700 text-sm font-semibold">{bookingSuccess}</p>
-                ) : null}
-
-                {authPromptOpen ? (
-                  <div className="mt-4 rounded-2xl border border-rose-100 bg-rose-50/60 p-4">
-                    <p className="text-sm font-extrabold text-slate-900">Login required to book</p>
-                    <p className="mt-1 text-sm text-slate-600">
-                      Please login (or create an account) to confirm your seats.
-                    </p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => navigate("/Login")}
-                        className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl font-semibold shadow-sm transition"
-                      >
-                        Login / Sign up
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAuthPromptOpen(false)}
-                        className="bg-white hover:bg-slate-50 text-slate-900 px-4 py-2.5 rounded-xl font-semibold shadow-sm transition border border-slate-200"
-                      >
-                        Continue browsing
-                      </button>
-                    </div>
-                  </div>
                 ) : null}
 
                 <div className="mt-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
