@@ -45,6 +45,12 @@ function Navbar() {
   // Listen for auth state changes
   useEffect(() => {
     const updateAuthState = () => {
+      // Force check and clear any invalid tokens
+      const token = localStorage.getItem("auth_token");
+      if (token && token === "undefined" || token === "null" || token === "") {
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("auth_user");
+      }
       setAuthState({ loggedIn: isLoggedIn(), role: getUserRole() });
     };
 
